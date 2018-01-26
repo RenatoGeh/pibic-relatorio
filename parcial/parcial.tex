@@ -184,6 +184,8 @@ que serão enumeradas a seguir e em seguida exploradas em mais detalhes.
   \item Testes de completude e decomponibilidade.\label{lbl-cc}
 \end{enumerate}
 
+Os itens~\ref{lbl-gensdomingos} e~\ref{lbl-arff} foram implementados antes do início da bolsa.
+
 Redes soma-produto são DAGs cujos nós podem ser nós somas, em que o valor da soma é a média
 ponderada de seus filhos; nós produtos, cujos valores são o produtório de seus filhos; ou folhas,
 que representam distribuições de probabilidade univariadas. O valor de uma SPN é o valor de sua
@@ -247,7 +249,9 @@ de aprendizado de parâmetros, fez-se necessária a implementação da estrutura
 em~\cite{poon-domingos}. O algoritmo de geração de tal estrutura cria uma rede adequada para
 conjuntos de dados que apresentam dependência local entre variáveis. Este tipo de estrutura é
 aplicável a compleição e classificação de imagens, já que \textit{pixels} vizinhos apresentam
-coloração semelhante.
+coloração semelhante. A geração desta estrutura depende principalmente de três parâmetros, o número
+de nós somas por cada região retangular da imagem, denotada por $m$; o número de distribuições
+gaussianas por pixel, denotada por $g$; e o menor nível de resolução da imagem em pixels, $r$.
 
 Para validação dos algoritmos, é interessante utilizar conjuntos de dados de diferentes aplicações
 do mundo real. Para tanto, foi necessário adotar um formato padronizado. Foi implementado suporte
@@ -271,16 +275,26 @@ um DAG\@.
 
 Não foram encontradas implementações do algoritmo de aprendizado generativo por descida de
 gradiente. O artigo de Poon e Domingos comenta que aprendizado por descida de gradiente se dá
-naturalmente por \textit{backpropagation}\cite{poon-domingo}, no entanto o código anexado não
+naturalmente por \textit{backpropagation}\cite{poon-domingos}, no entanto o código anexado não
 apresenta nenhuma implementação do algoritmo. Adicionalmente, uma busca por implementações
 disponíveis indica a falta de uma implementação generativa por descida de gradiente. O algoritmo
 descrito no~\autoref{lbl-generativegd} foi implementado por meio das descrições contidas
 nos artigos~\cite{poon-domingos,discriminative}.
 
+O tamanho da rede gerada pelo algoritmo de estrutura densa de Poon e Domingos também mostrou-se
+problemática. O número de nós no grafo gerado com uma imagem $46\times 56$ e com parâmetros $m=4$,
+$g=4$ e $r=4$ foi 1.701.333. O tempo total gasto no aprendizado de tal SPN foi de aproximadamente 6
+horas e ocupou 1GB de memória. No entanto, tais parâmetros usados são considerados pequenos, já que
+os parâmetros usados no artigo original foram $m=20$, $g=4$ e $r=4$ em uma imagem de tamanho
+$64\times 64$. Ao gerarmos o grafo com tais parâmetros, excedeu-se a memória de 16GB\@. No artigo
+original, foi usado um \textit{cluster} de 48 máquinas com 8 processadores e 16GB de memória cada,
+o que explica a discrepância.
+
 \section{Resultados}
 
 Até o momento foi apenas possível extrair resultados do algoritmo de aprendizado estrutural de Gens
-e Domingos. Foram utilizados três conjuntos de dados: Caltech-101~\cite{caltech}, Olivetti Faces e
+e Domingos. Tanto a implementação como a extração dos resultados foram realizadas antes do início
+da bolsa. Foram utilizados três conjuntos de dados: Caltech-101~\cite{caltech101}, Olivetti Faces e
 Digits.
 
 O primeiro contém imagens de diferentes dimensões e resoluções de 101 categorias de
@@ -355,23 +369,20 @@ teste com conhecimento prévio. Chama-se de teste sem conhecimento prévio quand
 as faces de outras pessoas somente.
 
 \begin{figure}[h]
-  \centering\includegraphics[scale=1.3]{imgs/c1_face_cmpl_39.png}
+  \centering\includegraphics[scale=0.9]{imgs/c1_face_cmpl_39.png}
   \captionsetup{justification=raggedright}
   \caption{O resultado da compleição da parte esquerda da face dada a parte direita do rosto. Neste
   teste houve conhecimento prévio. O modelo percebe a presença de óculos e pêlo facial.}
 \end{figure}
 \newpage
 
-\begin{figure}[h]
-  \centering\includegraphics[scale=1.3]{imgs/c2_face_cmpl_39.png}
+\begin{figure}[H]
+  \centering\includegraphics[scale=0.9]{imgs/c2_face_cmpl_39.png}
   \captionsetup{justification=raggedright}
   \caption{A mesma face, porém sem conhecimento prévio. O modelo já não percebe a presença de
   óculos com a mesma taxa de acerto.}
 \end{figure}
 
-Mais resultados podem ser vistos em \url{https://github.com/RenatoGeh/gospn/tree/dev/results}.
-
-\newpage
 \printbibliography[]
 
 \end{document}
