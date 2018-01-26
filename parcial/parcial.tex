@@ -184,7 +184,8 @@ que serão enumeradas a seguir e em seguida exploradas em mais detalhes.
   \item Testes de completude e decomponibilidade.\label{lbl-cc}
 \end{enumerate}
 
-Os itens~\ref{lbl-gensdomingos} e~\ref{lbl-arff} foram implementados antes do início da bolsa.
+Os itens~\ref{lbl-inference},~\ref{lbl-gensdomingos} e~\ref{lbl-arff} foram implementados antes do
+início da bolsa.
 
 Redes soma-produto são DAGs cujos nós podem ser nós somas, em que o valor da soma é a média
 ponderada de seus filhos; nós produtos, cujos valores são o produtório de seus filhos; ou folhas,
@@ -225,16 +226,16 @@ recursivamente:
     variáveis
     \Ensure\,SPN representando a distribuição de probabilidade de $I$ sobre as variáveis $X$
     \If{$|X|=1$}
-      \State\,\textbf{retorna} distribuição de probabilidade univariada de $I$
+      \State\,\textbf{return} distribuição de probabilidade univariada de $I$
     \Else%
       \State\,Particione $X$ em $P_1,P_2,\ldots,P_m$ tal que todo $P_i$ é independente de $P_j$,
       $i\neq j$
       \If{$m>1$}
-        \State\,\textbf{retorna} nó produto cujos filhos são as recorrências
+        \State\,\textbf{return} nó produto cujos filhos são as recorrências
         \mcode{LearnSPN$(I,P_i)$}, para todo $1\leq i\leq m$
       \Else%
         \State\,Rode \textit{clustering} em $I$ tal que $Q_1,Q_2,\ldots,Q_n$ são os clusters de $I$
-        \State\,\textbf{retorna} nó soma cujos filhos são as recorrências \mcode{LearnSPN$(Q_i,X)$}
+        \State\,\textbf{return} nó soma cujos filhos são as recorrências \mcode{LearnSPN$(Q_i,X)$}
         com peso $|Q_i|/|I|$
       \EndIf%
     \EndIf%
@@ -263,7 +264,7 @@ valorações distintas nos filhos de um mesmo nó produto. Quando uma SPN é com
 diz-se que ela é válida. Uma SPN válida computa a probabilidade exata de uma evidência. A SPN $S$ é
 decomponível se, em um nó produto de $S$, os escopos dos filhos são disjuntos. Decomponibilidade
 implica em consistência, além do que SPNs consistentes não são mais compactas que SPNs
-decomponíveis~\cite{theoretical-spn}. Foram implementados funções que verificam se uma SPN é
+decomponíveis~\cite{theoretical-spn}. Foram implementadas funções que verificam se uma SPN é
 completa ou decomponível.
 
 Além de funções que tem relação direta com redes soma-produto, também foi necessário implementar
@@ -273,13 +274,15 @@ um DAG\@.
 
 \section{Problemas encontrados}
 
-Não foram encontradas implementações do algoritmo de aprendizado generativo por descida de
-gradiente. O artigo de Poon e Domingos comenta que aprendizado por descida de gradiente se dá
-naturalmente por \textit{backpropagation}\cite{poon-domingos}, no entanto o código anexado não
-apresenta nenhuma implementação do algoritmo. Adicionalmente, uma busca por implementações
-disponíveis indica a falta de uma implementação generativa por descida de gradiente. O algoritmo
-descrito no~\autoref{lbl-generativegd} foi implementado por meio das descrições contidas
-nos artigos~\cite{poon-domingos,discriminative}.
+Em~\cite{poon-domingos}, os autores não explicam de forma explícita as etapas para o algoritmo de
+aprendizado por descida de gradiente. Adicionalmente não foram encontradas implementações do
+algoritmo de aprendizado generativo por descida de gradiente. O artigo de Poon e Domingos comenta
+que aprendizado por descida de gradiente se dá naturalmente por
+\textit{backpropagation}\cite{poon-domingos}, no entanto o código anexado não apresenta nenhuma
+implementação do algoritmo. Além disso, uma busca por implementações disponíveis indica a falta
+de uma implementação generativa por descida de gradiente. Por tanto, foram feitas certas suposições
+com relação à implementação. Foram utilizados comentários sobre o algoritmo contidos nos
+artigos~\cite{poon-domingos,discriminative} para tal implementação.
 
 O tamanho da rede gerada pelo algoritmo de estrutura densa de Poon e Domingos também mostrou-se
 problemática. O número de nós no grafo gerado com uma imagem $46\times 56$ e com parâmetros $m=4$,
@@ -335,14 +338,16 @@ a 9, com cada dígito tendo 70 amostras. A variância das imagens em cada catego
 \end{figure}
 
 Foram utilizados Caltech-101 e Digits para testes de classificação, e Olivetti para compleição de
-imagens. Para cada iteraçõo, foi usado uma porcentagem $p$ para validação cruzada, onde $p$ é a
+imagens. Para cada iteração, foi usado uma porcentagem $p$ para validação cruzada, onde $p$ é a
 porcentagem do \textit{dataset} usado para treino, e $1-p$ para teste.
 
 \begin{figure}[h]
   \centering\includegraphics[scale=0.75]{imgs/caltech_percs.png}
   \captionsetup{justification=raggedright}
   \caption{O gráfico mostra a porcentagem de acerto no conjunto de dados Caltech-101 normalizado
-  para $p$ variáveis.}
+  para uma porcentagem $p$ de instâncias usadas para treino. A barra verde mostra as porcentagens
+  de acerto máximas e mínimas, enquanto que a linha azul mostra as médias das porcentagens de
+  acerto.}
 \end{figure}
 
 \begin{figure}[H]
@@ -362,11 +367,16 @@ porcentagem do \textit{dataset} usado para treino, e $1-p$ para teste.
   \caption{O gráfico mostra o tempo de aprendizado para cada $p$ em Digits.}
 \end{figure}
 
-Para compleição de imagens no conjunto de dados Olivetti, foram aplicados dois testes. O conjunto
-Olivetti possue 10 imagens de cada face de uma pessoa. No primeiro teste, o modelo utilizou tanto
-as imagens de outras pessoas como 9 imagens da pessoa a ser completada. Chamou-se este método como
-teste com conhecimento prévio. Chama-se de teste sem conhecimento prévio quando apenas utilizamos
-as faces de outras pessoas somente.
+O conjunto Olivetti possue 10 imagens de cada pessoa em diferentes ângulos. As imagens
+diferenciam-se pela presença de acessórios, como óculos, ou por suas feições faciais, como boca
+aberta, sorriso ou olhos fechados.
+
+Para compleição de imagens no conjunto de dados Olivetti, foram aplicados dois testes. Em ambos
+testes foi selecionada uma imagem a ser completada, que é então removida do conjunto de treino. No
+primeiro teste, o modelo utilizou tanto as imagens de outras pessoas como as 9 imagens restantes da
+pessoa a ser completada como conjunto de treino. Chamou-se este método de teste com conhecimento
+prévio. Chamou-se de teste sem conhecimento prévio quando apenas utilizamos as faces de outras
+pessoas, descartando as 9 restantes.
 
 \begin{figure}[h]
   \centering\includegraphics[scale=0.9]{imgs/c1_face_cmpl_39.png}
