@@ -123,23 +123,23 @@ Orientador: Prof.\ Dr.\ Denis Deratani Mauá}\\
 
 \section{Introdução}
 
-Aprendizado de máquina é uma área da Inteligência Artificial cujo objetivo é estatisticamente
-ajustar os parâmetros de um certo modelo matemático dado um conjunto de dados a fim de que seja
-possível fazer previsões acuradas do que se está modelando. Para isso, faz-se uso de modelos
-estatísticos e métodos computacionais. Modelos probabilísticos baseados em grafos (PGM, do inglês
-\textit{Probabilistic Graphical Model}), são uma classe destes modelos estatísticos em que se usa
-grafos para representá-los graficamente.
+Este relatório parcial descreve as atividades realizadas no projeto PIBIC 800585/2016\texttt{-}0
+durante o período de 01/08/2017 e 31/01/2018. Nesta seção, serão enunciados os objetivos do
+projeto. Em seguida, as atividades desenvolvidas durante o período serão descritas. Também serão
+explicados os problemas encontrados durante o projeto. Em fim, serão mostrados resultados
+parciais do projeto e apresentando uma breve conclusão do trabalho parcial do projeto.
 
-Modelos probabilísticos baseados em grafos representam uma distribuição de probabilidade de
-forma compacta. Estes modelos representados por grafos facilitam tanto a compreensão humana ao
-estudá-los, quanto possibilitam que vários problemas já existentes em Teoria dos Grafos sejam
-utilizados como solução para problemas em PGMs. Extrair conhecimento de PGMs é análogo a extrair a
-probabilidade de um certo evento ocorrer dado que eventos distintos tenham ocorrido. Tal extração
-de conhecimento é chamada de inferência. Fazer inferência exata em PGMs clássicas, ou seja,
-acharmos a probabilidade exata de um certo evento, é intratável. Uma solução para este problema é
-utilizarmos métodos para inferência aproximada nestes modelos. No entanto, tais algoritmos
-aproximados são muitas vezes difíceis de analisar. Além disso, como os algoritmos de aprendizado do
-modelo utilizam inferência como subrotina, por consequência o aprendizado torna-se aproximado.
+Modelos probabilísticos baseados em grafos (PGM, do inglês \textit{Probabilistic Graphical Models})
+representam uma distribuição de probabilidade de forma compacta. Estes modelos representados por
+grafos facilitam tanto a compreensão humana ao estudá-los, quanto possibilitam que vários problemas
+já existentes em Teoria dos Grafos sejam utilizados como solução para problemas em PGMs. Extrair
+conhecimento de PGMs é análogo a extrair a probabilidade de um certo evento ocorrer dado que
+eventos distintos tenham ocorrido. Tal extração de conhecimento é chamada de inferência. Fazer
+inferência exata em PGMs clássicas, ou seja, acharmos a probabilidade exata de um certo evento, é
+intratável. Uma solução para este problema é utilizarmos métodos para inferência aproximada nestes
+modelos. No entanto, tais algoritmos aproximados são muitas vezes difíceis de analisar. Além disso,
+como os algoritmos de aprendizado do modelo utilizam inferência como subrotina, por consequência o
+aprendizado torna-se aproximado.
 
 \begin{figure}[h]
   \centering
@@ -164,6 +164,54 @@ e linguagem natural~\cite{nat-lang}.
 Neste projeto, pretende-se desenvolver uma biblioteca livre e gratuita para inferência e algoritmos
 de aprendizado estado-da-arte em SPNs, analisando-se experimentalmente tais algoritmos em tarefas
 reais, como compleição e classificação de imagens.
+
+\section{Cronograma e acompanhamento}
+
+O cronograma original planejado para o projeto PIBIC é descrito abaixo, com o símbolo \checkmark{}
+usado para representar as atividades concluídas e $\times$ para atividades não terminadas.
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|c|c|c|c|c|c|c|}
+    \hline
+    Atividade/Mês & 1\tsup{o}--2\tsup{o} & 3\tsup{o}--4\tsup{o} & 5\tsup{o}--6\tsup{o} &
+    7\tsup{o}--8\tsup{o} & 9\tsup{o}--10\tsup{o} & 11\tsup{o}--12\tsup{o} \\ \hline
+    a & \checkmark{} & & & & & \\ \hline
+    b & \checkmark{} & & & & & \\ \hline
+    c & & \checkmark{} & & & & \\ \hline
+    d & & $\times$ & & & & \\ \hline
+    e & & & \checkmark{} & & & \\ \hline
+    f & & & & $\times$ & & \\ \hline
+    g & $\times$ & $\times$ & \checkmark{} & $\times$ & & \\ \hline
+    h & & & & & $\times$ & \\ \hline
+    i & & & & & $\times$ & $\times$ \\ \hline
+    j & & & & & & $\times$ \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{enumerate}[label=\alph*.]
+  \item Estudo de conceitos de SPN\@.
+  \item\label{lbl-c-pd} Estudo e implementação do algoritmo de aprendizado de Poon e Domingos
+    (2011)~\cite{poon-domingos}.
+  \item\label{lbl-c-ds} Estudo e replicação da rede para compleção de imagens descrita em Poon e
+    Domingos (2011).
+  \item\label{lbl-c-vd} Estudo e implementação do algoritmo de aprendizado de estrutura de Ventura
+    e Dennis (2012)~\cite{clustering}.
+  \item Estudo e implementação do algoritmo de aprendizado de estrutura de Gens e Domingos
+    (2013)~\cite{gens-domingos}.
+  \item\label{lbl-c-vm} Estudo e implementação do algoritmo de aprendizado de estrutura de Vergari
+    e di Mauro (2016)~\cite{vergari-mauro}.
+  \item Avaliação de desempenho de algoritmos em problemas de compleição de imagem.
+  \item Elaboração de artigo para ENIAC 2018.
+  \item Relatório e participação no SIICUSP\@.
+  \item Disponibilização da biblioteca e documentação do código.
+\end{enumerate}
+
+Os itens~\ref{lbl-c-pd} e~\ref{lbl-c-ds}, assim como a avaliação do desempenho vinculado ao
+algoritmo, geraram vários problemas com relação a implementação, causando atraso no cronograma.
+Esses problemas são detalhados na~\autoref{sct-prob}. Apesar do atraso, planeja-se manter o
+cronograma atual, realizando-se as atividades descritas nos itens~\ref{lbl-c-vd} e~\ref{lbl-c-vm}
+durante os subsequentes meses.
 
 \section{Atividades desenvolvidas}
 
@@ -272,7 +320,7 @@ algoritmos clássicos de teoria dos grafos. Foram criadas funções para busca-e
 busca-em-largura, achar uma \textit{spanning tree} de um grafo, e encontrar a ordem topológica de
 um DAG\@.
 
-\section{Problemas encontrados}
+\section{Problemas encontrados}\label{sct-prob}
 
 Em~\cite{poon-domingos}, os autores não explicam de forma explícita as etapas para o algoritmo de
 aprendizado por descida de gradiente. Adicionalmente não foram encontradas implementações do
@@ -292,6 +340,11 @@ os parâmetros usados no artigo original foram $m=20$, $g=4$ e $r=4$ em uma imag
 $64\times 64$. Ao gerarmos o grafo com tais parâmetros, excedeu-se a memória de 16GB\@. No artigo
 original, foi usado um \textit{cluster} de 48 máquinas com 8 processadores e 16GB de memória cada,
 o que explica a discrepância.
+
+Ao final da implementação do algoritmo de Poon e Domingos, os resultados extraídos a partir dos
+conjuntos de dados escolhidos mostraram-se incompatíveis com o esperado. Para resolver tal
+problema, planeja-se fazer diversos testes nas implementações da estrutura e algoritmo de
+aprendizado de Poon e Domingos.
 
 \section{Resultados}
 
@@ -392,6 +445,19 @@ pessoas, descartando as 9 restantes.
   \caption{A mesma face, porém sem conhecimento prévio. O modelo já não percebe a presença de
   óculos com a mesma taxa de acerto.}
 \end{figure}
+\newpage
+
+\section{Conclusão}
+
+O objetivo do projeto é o desenvolvimento de uma biblioteca livre e gratuita para inferência e
+aprendizado estado-da-arte de redes soma-produto, além de elaborar análises experimentais dos
+algoritmos de aprendizado em tarefas de compleição e classificação de imagens. Neste relatório
+parcial, foram descritas as atividades desenvolvidas, problemas encontrados e os resultados
+parciais realizados durante o período de 01/08/2017 e 31/01/2018. Entre as atividades
+desenvolvidas, foram mencionadas funções de inferência, verificação de completude e
+decomponibilidade, algoritmos de aprendizado de Gens-Domingos e Poon-Domingos, e geração de
+estrutura densa. Por último, foram apresentados resultados parciais em classificação e compleição
+de imagem para o algoritmo de Gens-Domingos.
 
 \printbibliography[]
 
