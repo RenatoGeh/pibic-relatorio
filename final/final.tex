@@ -238,9 +238,10 @@ Neste projeto, buscou-se analisar três artigos de aprendizado de redes soma-pro
 \end{enumerate}
 
 Foram implementados os algoritmos descritos e tentou-se replicar os resultados apresentados nos
-artigos. Para isso, foi construída a biblioteca GoSPN\footnote{https://github.com/RenatoGeh/gospn}
-na linguagem Go. A escolha da linguagem foi dada pelo suporte nativo a programação concorrente e
-paralela, velocidade de execução, e por ser uma linguagem fortemente tipada e compilada.
+artigos. Para isso, foi construída a biblioteca
+GoSPN\footnote{\url{https://github.com/RenatoGeh/gospn}} na linguagem Go. A escolha da linguagem
+foi dada pelo suporte nativo a programação concorrente e paralela, velocidade de execução, e por
+ser uma linguagem fortemente tipada e compilada.
 
 Após implementados os métodos de aprendizagem, foram feitos testes e comparações nos desempenhos e
 acurácias dos três algoritmos nos seguintes conjuntos de dados de imagens.
@@ -331,17 +332,33 @@ da~\autoref{tab:gradients}.
     & \\
     \hline
   \end{tabular}
-  \caption{\label{tab:derivative-weight} As derivadas parciais da SPN em função da aresta $n\to j$.}
+  \caption{\label{tab:gradients} As derivadas parciais da SPN em função da aresta $n\to j$.}
 \end{table}
 
 Onde $c_{n,j}$ denota a contagem de vezes que $w_{n,j}$ pertence a $W$. No caso do método
 \textit{soft} de gradiente descendente, a atualização do peso depende da derivada parcial
-$\iddspn{S}{w_{n,j}}$, enquanto que a versão \textit{hard} $\Delta w_{n,j}$ apenas depende do
+$\iddspn{S}{w_{n,j}}$, enquanto que na versão \textit{hard}, $\Delta w_{n,j}$ apenas depende do
 número de passagens pela aresta. É portanto possível perceber o porquê do método \textit{soft}
 ter problemas com difusão de gradiente e \textit{hard} não. Testes feitos com todos os conjuntos de
 dados usados mostraram que difusão de gradiente ocorreu em todos eles, o que mostra que, em
 casos de mundo real é necessário o uso do método de otimização de gradiente descendente
 \textit{hard}.
+
+\begin{figure}[h]
+  \begin{subfigure}{.5\textwidth}
+    \centering\includegraphics[scale=0.375]{graphs/softgrad.png}
+    \caption{Derivação \textit{soft}}
+  \end{subfigure}
+  \begin{subfigure}{.5\textwidth}
+    \centering\includegraphics[scale=0.375]{graphs/hardgrad.png}
+    \caption{Derivação \textit{hard}}
+  \end{subfigure}
+  \captionsetup{justification=raggedright}
+  \caption{O gradiente no método \textit{soft} tende a se diluir conforme a altura da rede. Usando
+  a derivação \textit{hard}, o gradiente não depende da derivada parcial diluída.}
+\end{figure}
+
+
 
 %O primeiro contém imagens de diferentes dimensões e resoluções de 101 categorias de
 %objetos. Foram escolhidas as categorias carro, motos e faces. As imagens foram padronizadas e
