@@ -142,7 +142,7 @@ Orientador: Prof.\ Dr.\ Denis Deratani Mauá}\\
   inferência e aprendizado de redes soma-produto. O segundo foi fazer uma comparação de alguns
   algoritmos de aprendizado de SPNs no domínio de classificação e compleição de imagens.\\~\\
 
-  \textbf{Palavras-chave:} Modelos probabilisticos baseados em grafo, redes soma-produto,
+  \textbf{Palavras-chave:} Modelos probabilísticos baseados em grafo, redes soma-produto,
   processamento de imagens
   \newpage
 \end{abstract}
@@ -269,20 +269,21 @@ ou multinomiais como folhas da rede.
 Para o método de otimização de descida de gradiente, foram criadas as versões \textit{soft} e
 \textit{hard}. A primeira usa as derivadas parciais da SPN em função dos pesos para atualizar os
 parâmetros da rede. No entanto, para o caso de redes profundas o gradiente tende a se aproximar de
-zero. Para evitar este problema, usa-se o segundo método. Seja $S$ uma SPN, define-se $M$ a rede
-máximo-produto (MPN) de $S$ como o grafo cópia de $S$ em que todos os nós somas são substituidos
-por nós máximo. O valor de um nó máximo é o maior valor de seus filhos. O valor de uma MPN é o
-valor da raíz. O caminho percorrido pelos valores positivos de uma MPN representa a probabilidade
-\textit{maximum a posteriori} (MAP). Denotaremos por $W$ o multiconjunto de todas as arestas que
-pertencem ao caminho descrito pelo MAP\@. Extraindo as derivadas da MPN $M$ e denotando $\Ch(n)$ e
-$\Pa(n)$ os conjuntos de filhos e pais do nó $n$ respectivamente, temos os valores descritos nas
-tabelas~\ref{tab:derivative-spn} e~\ref{tab:derivative-weight}.
+zero conforme o sinal é propagado pela rede. Para evitar este problema, usa-se o segundo método.
+Seja $S$ uma SPN, define-se $M$ a rede máximo-produto (MPN) de $S$ como o grafo cópia de $S$ em que
+todos os nós somas são substituidos por nós máximo. O valor de um nó máximo é o maior valor
+ponderado de seus filhos. O valor de uma MPN é o valor da raíz. O caminho percorrido a partir da
+raíz de maior valor representa a probabilidade \textit{maximum a posteriori} (MAP). Denotaremos
+por $W$ o multiconjunto de todas as arestas que pertencem ao caminho descrito pelo MAP\@. Extraindo
+as derivadas da MPN $M$ e denotando $\Ch(n)$ e $\Pa(n)$ os conjuntos de filhos e pais do nó $n$
+respectivamente, temos os valores descritos nas tabelas~\ref{tab:derivative-spn}
+e~\ref{tab:derivative-weight}.
 
 \begin{table}[h]
   \centering
   \begin{tabular}{l|l}
     \hline
-    \multicolumn{1}{c}{\bfseries Método} & \multicolumn{1}{c}{\bfseries Derivada parcial do nó}\\
+    \multicolumn{1}{c}{\bfseries Método} & \multicolumn{1}{c}{\bfseries Derivada parcial do nó $j$}\\
     \hline & \\
     \textbf{Soft} & \(\displaystyle \ddspn{S}{S_j}=\sum_{\substack{n\in\Pa(j)\\n:\text{ soma}}}w_{n,j}\ddspn{S}{S_n}+\sum_{\substack{n\in\Pa(j)\\n:\text{ produto}}}\ddspn{S}{S_n}\prod_{k\in\Ch(n)\setminus\{j\}}S_k\) \\
     & \\
@@ -316,6 +317,8 @@ tabelas~\ref{tab:derivative-spn} e~\ref{tab:derivative-weight}.
   \caption{\label{tab:derivative-weight} As derivadas parciais da SPN em função da aresta $n\to j$.}
 \end{table}
 
+Todas as derivadas são em função de certa evidência. Portanto a notação $\iddspn{S}{S_j}$ equivale a
+$\iddspn{S}{S_j}(X)$, onde $X$ é algum conjunto de valorações válidas para as variáveis de $S$.
 Para computar o gradiente, deriva-se a log-verossimilhança da distribuição da SPN em função do
 conjunto de parâmetros $w$, ou seja, $\ddspn{}{w}\log\pr(X)$, obtendo os resultados
 da~\autoref{tab:gradients}.
@@ -358,7 +361,51 @@ casos de mundo real é necessário o uso do método de otimização de gradiente
   a derivação \textit{hard}, o gradiente não depende da derivada parcial diluída.}
 \end{figure}
 
+Para a implementação e replicação dos resultados do artigo de Poon-Domingos, foi necessário
+implementar o algoritmo de geração de estrutura densa descrito no artigo. O código escrito para
+este algoritmo é restrito ao domínio de imagens, no entanto, a ideia por trás da arquitetura pode
+ser aplicada a qualquer domínio em que existe uma forte relação de dependência entre variáveis
+locais~\cite{poon-domingos}.
 
+A estrutura densa é formulada a partir da ideia de que existe uma relação de semelhança entre
+os pixels de uma região retangular de uma imagem, e uma relação de independência entre outras
+regiões retangulares que não a contém. Cada região retangular é representada por um conjunto de $m$
+nós somas. Para cada região retangular, decompõe-se a região em duas partições de forma que as
+partições também sejam regiões retangulares da imagem. Na SPN, representa-se esta decomposição por
+um conjunto de nós produtos.
+
+\begin{figure}[h]
+  \centering\includegraphics[scale=0.5]{graphs/decomp.png}
+  \captionsetup{justification=raggedright}
+  \caption{Decomposição de uma região $R$ em duas subregiões $R_1$ e $R_2$. O conjunto $\Pi$ de nós
+  produtos representa a relação de independência entre as duas subregiões.}
+\end{figure}
+
+Quando $R$ representa a própria imagem, ou seja, a região retangular que engloba todos os pixels da
+imagem, então o conjunto de nós somas contém apenas um nó soma. Para regiões unitárias em que a
+região é apenas um pixel, ao invés de somas, geram-se $g$ gaussianas de tal forma que cada $k$
+gaussiana é o $k$-ésimo quantil da distribuição dos valores do pixel. Quando a região tem dimensões
+menores que $r\times r$, a chamamos de região fina. As regiões maiores ou iguais a $r\times
+r$ são chamadas de regiões grosseiras. Para as regiões grosseiras tomam-se apenas partições que
+geram subregiões maiores ou iguais a $r\times r$, enquanto que para regiões finas, geram-se
+partições para todas as possíveis subregiões retangulares. As arestas conectando uma região $R$ ao
+conjunto de produtos $\Pi$ são geradas de tal forma que todo nó soma de $R$ está conectada a todo
+nó produto de $\Pi$. Porém, as arestas ligando cada produto em $\Pi$ a cada nó soma nas subregiões
+$R_1$ e $R_2$ podem ou não existir. Para decidir quais arestas devem existir, escolhe-se uma
+ligação $\pi_k\to\sigma_j^i$, onde $\pi\in\Pi$ e $\sigma_j^i\in R_j$, tal que esta aresta seja a
+mais provável dada uma instância do conjunto de treinamento.
+
+No código disponibilizado pelos autores do
+artigo\footnote{http://spn.cs.washington.edu/spn/downloadspn.php}, o algoritmo usa \textit{hard}
+Expectation-Maximization (EM) para gerar as arestas mais prováveis e decidir seus pesos, apesar do
+artigo dar resultados para o método de otimização de gradiente descendente. Com o intuito de gerar
+resultados mais semelhantes ao artigo possível, foi implementada a parte de se gerar as arestas
+mais prováveis por \textit{hard} EM, porém a ponderação das arestas foi feita a partir do método de
+gradiente.
+
+O algoritmo de Dennis-Ventura segue uma ideia similar ao de Poon-Domingos, mantendo a relação de
+localidade entre pixels. No entanto, generaliza-se a ideia de região para qualquer conjunto de
+pixels similares. Para isso, usa-se métodos de \textit{clustering} para achar tais regiões.
 
 %O primeiro contém imagens de diferentes dimensões e resoluções de 101 categorias de
 %objetos. Foram escolhidas as categorias carro, motos e faces. As imagens foram padronizadas e
