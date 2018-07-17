@@ -5,6 +5,7 @@
 \usepackage{graphicx}
 \usepackage{mathtools}
 \usepackage{amsthm}
+\usepackage{amssymb}
 \usepackage{thmtools,thm-restate}
 \usepackage{amsfonts}
 \usepackage{hyperref}
@@ -391,7 +392,7 @@ geram subregiões maiores ou iguais a $r\times r$, enquanto que para regiões fi
 partições para todas as possíveis subregiões retangulares. As arestas conectando uma região $R$ ao
 conjunto de produtos $\Pi$ são geradas de tal forma que todo nó soma de $R$ está conectada a todo
 nó produto de $\Pi$. Porém, as arestas ligando cada produto em $\Pi$ a cada nó soma nas subregiões
-$R_1$ e $R_2$ podem ou não existir. Para decidir quais arestas devem existir, escolhe-se uma
+$r_1$ e $R_2$ podem ou não existir. Para decidir quais arestas devem existir, escolhe-se uma
 ligação $\pi_k\to\sigma_j^i$, onde $\pi\in\Pi$ e $\sigma_j^i\in R_j$, tal que esta aresta seja a
 mais provável dada uma instância do conjunto de treinamento.
 
@@ -403,9 +404,51 @@ resultados mais semelhantes ao artigo possível, foi implementada a parte de se 
 mais prováveis por \textit{hard} EM, porém a ponderação das arestas foi feita a partir do método de
 gradiente.
 
-O algoritmo de Dennis-Ventura segue uma ideia similar ao de Poon-Domingos, mantendo a relação de
-localidade entre pixels. No entanto, generaliza-se a ideia de região para qualquer conjunto de
-pixels similares. Para isso, usa-se métodos de \textit{clustering} para achar tais regiões.
+O algoritmo de Dennis-Ventura segue uma ideia similar ao de Poon-Domingos, buscando achar relações
+de semelhança e independência entre regiões da imagem. No entanto, generaliza-se a ideia de região
+para qualquer conjunto de pixels similares, mesmo que não sejam localmente próximas, e podendo
+tomar formas arbitrárias. Para isso, usa-se métodos de clustering para achar tais regiões.
+
+Seja $D$ o conjunto de dados, onde $D_i$ é a $i$-ésima instância. $D_i$ então descreve um conjunto
+ordenado de valorações dos pixels (ou seja, uma imagem) indexado pelos pixels. É possível
+visualizar $D$ como uma matriz $n\times m$, onde $n$ é o número de imagens do conjunto de dados e
+$m$ é o número de pixels na imagem. A transposta de $D^\intercal$ é portanto a matriz $m\times n$,
+onde as colunas são as imagens e as linhas as valorações de um mesmo pixel.
+
+Para o algoritmo de Dennis-Ventura, gera-se inicialmente um ``grafo de regiões'' que descreve a SPN
+por meio de um esboço da arquitetura final. Um nó no grafo de regiões é um nó região ou um nó
+partição. A raíz do grafo é sempre a imagem inteira. O grafo de regiões é gerado particionando-se,
+recursivamente, cada região em duas subregiões. Seja $R$ um nó região e $D_R^\intercal$ o conjunto
+de dados transposto contendo apenas variáveis no escopo de $R$, particiona-se $R$ em duas
+subregiões $R_1$ e $R_2$ usando $2$-means clustering em $D_R^\intercal$. O resultado deste
+clustering são os dois conjuntos de dados transpostos $D_{R_1}^\intercal$ e $D_{R_2}^\intercal$.
+Cria-se um nó partição $P$ e liga-se $R\to P$, $P\to R_1$ e $P\to R_2$. Em seguida, faz-se a
+recorrência em $R_1$ e $R_2$ se, para cada região, seu escopo for maior que um. Para o nó raíz,
+repetem-se estes passos $k$ vezes, onde a cada passo $i$, usa-se o $i$-ésimo cluster de um
+$k$-cluster em $D$ (não transposto).
+
+\begin{figure}[h]
+  \begin{subfigure}{.4\linewidth}
+    \centering\includegraphics[scale=1.0]{imgs/simple_dv.png}
+    \caption{}
+  \end{subfigure}
+  \begin{subfigure}{.6\linewidth}
+    \centering\includegraphics[scale=1.0]{imgs/trans_dv.png}
+    \caption{}
+  \end{subfigure}
+  \captionsetup{justification=raggedright}
+  \caption{A arquitetura de Dennis-Ventura gera um grafo de regiões (a) que representa um esboço da
+    arquitetura real da rede soma-produto (b). Fonte:~\cite{clustering}}
+\end{figure}
+
+Após gerado o grafo de regiões, é feita uma transformação para uma rede soma-produto válida. Cada
+nó região é transformado em um conjunto de $m$ nós somas. Se a região representa apenas um pixel,
+então geram-se $g$ nós gaussianas, onde cada $q$-ésima gaussiana é o $q$-quantil do pixel. Para um
+nó partição P, sejam $R_1$ e $R_2$ as duas subregiões filhas de $P$, e sejam $|R_1|$ e $|R_2|$ o
+número de nós em cada filho do nó partição. São então criados $|R_1| |R_2|$ nós produtos, onde cada
+aresta de $P$ é uma combinação dois a dois dos nós $R_1^i$ e $R_2^j$. O resultado desta
+transformação é a arquitetura de Dennis-Ventura. Após criada a arquitetura, aprende-se os pesos
+através do método de otimização de gradiente descendente.
 
 %O primeiro contém imagens de diferentes dimensões e resoluções de 101 categorias de
 %objetos. Foram escolhidas as categorias carro, motos e faces. As imagens foram padronizadas e
