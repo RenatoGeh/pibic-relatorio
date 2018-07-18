@@ -15,7 +15,7 @@
 \usepackage[justification=centering]{caption}
 \usepackage{indentfirst}
 \usepackage{algorithm}
-\usepackage{algpseudocode}
+\usepackage[noend]{algpseudocode}
 \usepackage{listings}
 \usepackage[x11names,rgb,table]{xcolor}
 \usepackage{tikz}
@@ -51,8 +51,13 @@
 \newcommand\defeq{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily def}}}{=}}}
 
 \newcommand{\algorithmautorefname}{Algorithm}
-\algrenewcommand\algorithmicrequire{\textbf{Input}}
-\algrenewcommand\algorithmicensure{\textbf{Output}}
+\algrenewcommand\algorithmicrequire{\textbf{Entrada}}
+\algrenewcommand\algorithmicensure{\textbf{Saída}}
+\algrenewcommand\algorithmicif{\textbf{se}}
+\algrenewcommand\algorithmicthen{\textbf{então}}
+\algrenewcommand\algorithmicelse{\textbf{senão}}
+\algrenewcommand\algorithmicfor{\textbf{para todo}}
+\algrenewcommand\algorithmicdo{\textbf{faça}}
 \algnewcommand{\LineComment}[1]{\State\,\(\triangleright\) #1}
 
 \captionsetup[table]{labelsep=space}
@@ -81,6 +86,7 @@
 \newcommand{\eps}{\varepsilon}
 \newcommand{\ddspn}[2]{\frac{\partial#1}{\partial#2}}
 \newcommand{\iddspn}[2]{\partial#1/\partial#2}
+\newcommand{\indep}{\perp}
 \renewcommand{\implies}{\Rightarrow}
 
 \newcommand{\bigo}{\mathcal{O}}
@@ -255,7 +261,7 @@ acurácias dos três algoritmos nos seguintes conjuntos de dados de imagens.
   \item MNIST~\cite{mnist}
 \end{enumerate}
 
-\section{Resultados e Discussão}
+\section{Resultados e discussão}
 
 O projeto consistiu na elaboração de três algoritmos de aprendizado. Estes algoritmos foram
 implementados na biblioteca GoSPN\footnotemark[1]. Duas variações do método de otimização de
@@ -336,7 +342,8 @@ da~\autoref{tab:gradients}.
     & \\
     \hline
   \end{tabular}
-  \caption{\label{tab:gradients} As derivadas parciais da SPN em função da aresta $n\to j$.}
+  \caption{\label{tab:gradients} As atualizações dos pesos da SPN a partir do gradiente para cada
+    aresta $n\to j$.}
 \end{table}
 
 Onde $c_{n,j}$ denota a contagem de vezes que $w_{n,j}$ pertence a $W$. No caso do método
@@ -449,6 +456,115 @@ número de nós em cada filho do nó partição. São então criados $|R_1| |R_2
 aresta de $P$ é uma combinação dois a dois dos nós $R_1^i$ e $R_2^j$. O resultado desta
 transformação é a arquitetura de Dennis-Ventura. Após criada a arquitetura, aprende-se os pesos
 através do método de otimização de gradiente descendente.
+
+O artigo de Gens e Domingos~\cite{gens-domingos} não explicíta o algoritmo em si. Ao invés disso, é
+dado um esquema de algoritmo que garante uma estrutura profunda. Este esquema é chamado de
+\code{LearnSPN}, e segue a ideia de que nós produtos representam independência entre as variáveis
+envolvidas, enquanto que nós somas representam relações de semelhança entre as instâncias do
+conjunto de dado.
+
+\begin{algorithm}[H]
+  \caption*{\code{LearnSPN}: Algoritmo de Gens-Domingos}
+  \begin{algorithmic}[1]
+    \Require\, Conjuntos $I$ de instâncias e $X$ de variáveis
+    \Ensure\,SPN representando a distribuição de probabilidade de $I$ sobre as variáveis $X$
+    \If{$|X|=1$}
+      \State\,\textbf{retorna} distribuição de probabilidade univariada de $I$
+    \Else%
+      \State\,Particione $X$ em $P_1,P_2,\ldots,P_m$ tal que todo $P_i$ é independente de $P_j$,
+      $i\neq j$
+      \If{$m>1$}
+        \State\,$\pi\gets$\mcode{Produto$()$}
+        \For{$i\gets 1,\ldots,m$}
+          \State\,\mcode{$p_i\gets$LearnSPN$(I, P_i)$}
+          \State\,\mcode{$\pi$.AdicionaFilho$(p_i)$}
+        \EndFor%
+        \State\,\textbf{retorna} $\pi$
+      \Else%
+        \State\,Faça \textit{clustering} em $I$ tal que $Q_1,Q_2,\ldots,Q_n$ são os clusters de $I$
+        \State\,$\sigma\gets$\mcode{Soma$()$}
+        \For{$i\gets 1,\ldots,n$}
+          \State\,\mcode{$s_i\gets$LearnSPN$(Q_i, X)$}
+          \State\,$w\gets |Q_i|/|I|$
+          \State\,\mcode{$\sigma$.AdicionaFilho$(s_i, w)$} \Comment{$w$ é o peso da aresta
+            $\sigma\to s_i$}
+        \EndFor%
+        \State\,\textbf{retorna} $\sigma$
+      \EndIf%
+    \EndIf%
+  \end{algorithmic}
+\end{algorithm}
+
+Para o algoritmo Gens-Domingos, separa-se o conjunto de dados $D$ em dois conjuntos $I$ e $X$ de
+instâncias (por exemplo, imagens) e variáveis (ou seja, o escopo). O algoritmo é recursivo e pode
+ser dividido em três partes: folha, produto e soma.
+
+Para definir uma folha, apenas verifica-se se o conjunto de dados tem apenas uma variável como
+escopo. Neste caso, retorna-se a distribuição de probabilidade univariada de $I$. Foram
+implementadas duas versões desta parte. A primeira retorna como folha uma distribuição multinomial
+com as frequências dos valores presentes em $I$. A segunda retorna uma distribuição gaussiana com
+média e variância calculadas a partir de $I$.
+
+Em seguida o algoritmo tenta construir um nó produto. Tomando-se $I$ e $X$, tenta-se particionar
+$X$ em $P_1,P_2,\ldots,P_m$ partições, onde toda variável $Y\in P_i$ e $Z\in P_j$ obedece $Y\indep
+X$ se e somente se $i\neq j$, onde $\indep$ representa independência. Foram implementados os testes
+de $\chi^2$ e $G$-test para estatisticamente determinar se duas variáveis são independentes. No
+entanto, testar cada variável par-a-par é intratável. Para resolver este problema, foi gerado um
+grafo de independência, onde um vértice representa uma variável e uma aresta indica dependência
+entre duas variáveis. Achar as partições de $X$ equivale a achar todas as componentes conexas do
+grafo. Melhor do que isso, é fácil ver que é suficiente achar a árvore geradora mínima do grafo de
+independência. Para isso, foi implementado o algoritmo de Kruskal para árvores geradoras mínimas.
+As partições $P_1,\ldots,P_m$ equivalem às componentes conexas do grafo. Se $m>1$, então foram
+encontradas relações de independência suficientes para construir um nó produto. Este nó produto tem
+como filhos as chamadas recursivas de \code{LearnSPN} onde os escopos foram reduzidos às variáveis
+de sua respectiva partição.
+
+Caso $m=1$, então o grafo é conexo. Neste caso, gera-se uma soma. Faz-se o clustering de $I$ em
+$Q_1,Q_2,\ldots,Q_n$ clusters. Foram implementadas versões que usam $k$-means, $k$-mode e
+$k$-median para clusterização com número de clusters fixos. O algoritmo DBSCAN também foi
+implementado. Este método de clustering baseado em densidade acha o número de clusters
+automaticamente. Assim que os $Q_i$ clusters foram determinados, retorna-se um nó soma cujos filhos
+são as chamadas recursivas com conjunto de instância restritas aos $Q_i$s. Adicionalmente, o peso
+das arestas do nó soma são as proporções dos tamanhos dos clusters.
+
+Os testes de desempenho dos três algoritmos cobriram cinco conjuntos de dados.
+
+\begin{enumerate}[label=\,(\alph*)]
+  \item Caltech-101~\cite{caltech101}
+  \item Olivetti Faces Dataset~\cite{olivetti}
+  \item Digits~\cite{digits}
+  \item DigitsX~\cite{digitsx}
+  \item MNIST~\cite{mnist}
+\end{enumerate}
+
+O conjunto de dados Caltech-101 original\footnote{Disponível em
+  \url{http://www.vision.caltech.edu/Image_Datasets/Caltech101/}.} contém imagens de 101 categorias
+de objetos. As imagens têm diferentes dimensões e resoluções. Para os testes de desempenho do
+projeto, as imagens foram padronizadas e redimensionadas para imagens em escala de cinza com
+dimensões $150\times 65$ e quantizadas para uma resolução de 8-bits.  Adicionalmente, foram
+escolhidas apenas as categorias moto, carro e rosto para classificação, as mesmas utilizadas para
+os testes do artigo original~\cite{poon-domingos}.
+
+\begin{figure}[h]
+  \centering\includegraphics[scale=1.0]{imgs/caltech_sample.png}
+  \caption{Uma amostra do conjunto de dados Caltech-101.}
+\end{figure}
+
+As imagens do Olivetti Faces Dataset\footnote{Disponível em
+  \url{http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html}} também foram
+redimensionadas para imagens de tamanho $46\times 56$ com resolução 8-bits em escala de cinza. Este
+conjunto de dados contém 10 fotos de rostos com ângulos e expressões diferentes de 40 pessoas
+diferentes. Este conjunto de dados foi utilizado apenas para compleição de imagens.
+
+\begin{figure}[h]
+  \centering\includegraphics[scale=0.5]{imgs/olivetti_sample.png}
+  \includegraphics[scale=0.5]{imgs/olivetti-8_sample.png}
+  \captionsetup{justification=raggedright}
+  \caption{Uma amostra do conjunto de dados Olivetti. A imagem do lado esquerdo é uma amostra antes
+    da redução de resolução. A imagem do lado direito mostra as imagens com resolução de 3-bits.}
+\end{figure}
+
+
 
 %O primeiro contém imagens de diferentes dimensões e resoluções de 101 categorias de
 %objetos. Foram escolhidas as categorias carro, motos e faces. As imagens foram padronizadas e
