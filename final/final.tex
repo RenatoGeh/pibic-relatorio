@@ -564,7 +564,38 @@ diferentes. Este conjunto de dados foi utilizado apenas para compleição de ima
     da redução de resolução. A imagem do lado direito mostra as imagens com resolução de 3-bits.}
 \end{figure}
 
+O par de conjuntos de dados
+Digits\footnote{Disponível em \url{https://github.com/RenatoGeh/datasets/tree/master/digits}.} e
+DigitsX\footnote{Disponível em \url{https://github.com/RenatoGeh/datasets/tree/master/digits_x}.}
+contém imagens de dígitos de zero a nove. Apenas um tipo de caligrafia foi usado, e portanto as
+imagens são semelhantes e têm baixa variância entre imagens de mesmo rótulo. Digits contém apenas
+imagens binárias (preto ou branco), onde 1 indica cor branca e 0 indica cor preta. O conjunto
+DigitsX é uma variação de Digits, onde cada imagem presente no conjunto original é transformada
+numa imagem de 8-bits. Além disso, é aplicado um filtro de embaçamento gaussiano (gaussian blur)
+para gerar maior variância e complexidade ao conjunto. São 70 imagens para cada dígito, dando um
+total de 700 imagens para cada conjunto. Todas imagens de Digits e DigitsX têm dimensões $20\times
+30$.
 
+\begin{figure}[h]
+  \centering\includegraphics[scale=1.5]{imgs/digits_sample.png}
+  \captionsetup{justification=raggedright}
+  \caption{Amostras de cada dígito dos conjuntos Digits e DigitsX. A amostra do topo pertence ao
+    conjunto Digits, onde cada pixel tem valor binário preto ou branco. A de baixo é a
+    transformação das mesmas imagens de cima para o formato DigitsX.}
+\end{figure}
+
+MNIST é um conjunto de dados frequentemente usado para testar o desempenho de classificadores.
+Assim como Digits, MNIST é um conjunto de dígitos de zero a nove escritos a mão. O conjunto
+original contém 60000 imagens de treino e 10000 de teste, com aproximadamente 250 tipos de
+caligrafia no conjunto de treino e 250 no de treino. Cada imagem tem dimensão $28\times 28$ e tem
+valores binários.
+
+\begin{figure}[h]
+  \centering\includegraphics[scale=1.0]{imgs/mnist_sample.png}
+  \captionsetup{justification=raggedright}
+  \caption{Amostra de dígitos do conjunto MNIST\@. Ao contrário de Digits, os dígitos são escritos
+    com valores representando branco, enquanto que o fundo é colorido com preto.}
+\end{figure}
 
 %O primeiro contém imagens de diferentes dimensões e resoluções de 101 categorias de
 %objetos. Foram escolhidas as categorias carro, motos e faces. As imagens foram padronizadas e
@@ -658,7 +689,6 @@ diferentes. Este conjunto de dados foi utilizado apenas para compleição de ima
   %\caption{A mesma face, porém sem conhecimento prévio. O modelo já não percebe a presença de
   %óculos com a mesma taxa de acerto.}
 %\end{figure}
-\newpage
 
 \section{Conclusão}
 
