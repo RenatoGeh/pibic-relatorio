@@ -524,7 +524,7 @@ $Q_1,Q_2,\ldots,Q_n$ clusters. Foram implementadas versões que usam $k$-means, 
 $k$-median para clusterização com número de clusters fixos. O algoritmo DBSCAN também foi
 implementado. Este método de clustering baseado em densidade acha o número de clusters
 automaticamente. Assim que os $Q_i$ clusters foram determinados, retorna-se um nó soma cujos filhos
-são as chamadas recursivas com conjunto de instância restritas aos $Q_i$s. Adicionalmente, o peso
+são as chamadas recursivas com conjunto de instância restritas aos $Q_i$. Adicionalmente, o peso
 das arestas do nó soma são as proporções dos tamanhos dos clusters.
 
 Os testes de desempenho dos três algoritmos cobriram cinco conjuntos de dados.
@@ -541,7 +541,7 @@ O conjunto de dados Caltech-101 original\footnote{Disponível em
   \url{http://www.vision.caltech.edu/Image_Datasets/Caltech101/}.} contém imagens de 101 categorias
 de objetos. As imagens têm diferentes dimensões e resoluções. Para os testes de desempenho do
 projeto, as imagens foram padronizadas e redimensionadas para imagens em escala de cinza com
-dimensões $150\times 65$ e quantizadas para uma resolução de 8-bits.  Adicionalmente, foram
+dimensões $150\times 65$ e quantizadas para uma resolução de 4-bits.  Adicionalmente, foram
 escolhidas apenas as categorias moto, carro e rosto para classificação, as mesmas utilizadas para
 os testes do artigo original~\cite{poon-domingos}.
 
@@ -552,9 +552,9 @@ os testes do artigo original~\cite{poon-domingos}.
 
 As imagens do Olivetti Faces Dataset\footnote{Disponível em
   \url{http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html}} também foram
-redimensionadas para imagens de tamanho $46\times 56$ com resolução 8-bits em escala de cinza. Este
+redimensionadas para imagens de tamanho $46\times 56$ com resolução 3-bits em escala de cinza. Este
 conjunto de dados contém 10 fotos de rostos com ângulos e expressões diferentes de 40 pessoas
-diferentes. Este conjunto de dados foi utilizado apenas para compleição de imagens.
+diferentes.
 
 \begin{figure}[h]
   \centering\includegraphics[scale=0.5]{imgs/olivetti_sample.png}
@@ -588,7 +588,8 @@ MNIST é um conjunto de dados frequentemente usado para testar o desempenho de c
 Assim como Digits, MNIST é um conjunto de dígitos de zero a nove escritos a mão. O conjunto
 original contém 60000 imagens de treino e 10000 de teste, com aproximadamente 250 tipos de
 caligrafia no conjunto de treino e 250 no de treino. Cada imagem tem dimensão $28\times 28$ e tem
-valores binários.
+valores binários. Foram escolhidas 2000 imagens de treino e 2000 de teste aleatoriamente para os
+testes.
 
 \begin{figure}[h]
   \centering\includegraphics[scale=1.0]{imgs/mnist_sample.png}
@@ -597,98 +598,114 @@ valores binários.
     com valores representando branco, enquanto que o fundo é colorido com preto.}
 \end{figure}
 
-%O primeiro contém imagens de diferentes dimensões e resoluções de 101 categorias de
-%objetos. Foram escolhidas as categorias carro, motos e faces. As imagens foram padronizadas e
-%redimensionadas em imagens em escala de cinza com 150 de largura e 65 de altura em resolução de
-%8-bits. O \textit{dataset} está disponível em
-%\url{http://www.vision.caltech.edu/Image_Datasets/Caltech101/}.
+Foram feitos testes de classificação e compleição em todos os conjuntos de dados. O algoritmo de
+Gens-Domingos admite tarefas de classificação e compleição sem alterar sua arquitetura, já que sua
+estrutura independe do domínio das variáveis. Para os algoritmos de Poon-Domingos e Dennis-Ventura,
+a rede gerada representa uma imagem, e adicionar informação externa requer modificar a estrutura da
+rede. Para a tarefa de classificação nestes dois métodos de aprendizado, foi gerada uma estrutura
+onde cada classe contém uma sub-SPN treinada a partir das instâncias do rótulo correspondente.
+Variáveis indicadoras da variável de classificação ``ligam'' e ``desligam'' as sub-SPNs conforme a
+valoração da classificação.
 
-%\begin{figure}[h]
-  %\centering\includegraphics[scale=1.0]{imgs/caltech_sample.png}
-  %\caption{Uma amostra do conjunto de dados Caltech-101.}
-%\end{figure}
+\begin{figure}[h]
+  \centering\includegraphics[scale=0.55]{graphs/classarch.png}
+  \captionsetup{justification=raggedright}
+  \caption{A arquitetura de classificação para os algoritmos de Poon-Domingos e Dennis-Ventura.
+    Para cada valoração da variável de classificação $Y$, toma-se uma variável indicadora $Y_i$.
+    O valor do nó produto ligado a $Y_i$ toma um valor 0 se $Y\neq y_i$, e $S|Y_i$ caso contrário.
+    $S|Y=y_i$ representa uma SPN treinada com dados onde $Y$ teve valor $y_i$.}
+\end{figure}
 
-%O segundo é um conjunto de imagens de faces, com diferentes expressões e ângulos. As imagens têm
-%dimensões $46\times 56$ com resolução de 8-bits em escala de cinza. Como a distribuição de cores é
-%irregular, com nenhum pixel tendo valores extremos como a cor branca, o algoritmo de independência
-%entre variáveis apresentou resultados inconsistentes. Tal problema foi resolvido diminuindo a
-%resolução das imagens para 3-bits. A qualidade das imagens não sofreu grande alteração com a
-%mudança. Pode-se encontrar o \textit{dataset} em
-%\url{http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html}.
+Para a tarefa de compleição de imagem nas arquiteturas de Poon-Domingos e Dennis-Ventura, foram
+feitos testes tanto com as suas estruturas originais, onde as rotulações das classes não são
+tomadas em consideração, quanto com as estruturas de classificação.
 
-%\begin{figure}[h]
-  %\centering\includegraphics[scale=0.5]{imgs/olivetti_sample.png}
-  %\includegraphics[scale=0.5]{imgs/olivetti-8_sample.png}
-  %\captionsetup{justification=raggedright}
-  %\caption{Uma amostra do conjunto de dados Olivetti. A imagem do lado esquerdo é uma amostra do
-  %\textit{dataset} antes da diminuição de resolução. A imagem do lado direito mostra as imagens com
-  %resolução de 3-bits.}
-%\end{figure}
+No artigo original de Hoifung Poon e Pedro Domingos~\cite{poon-domingos}, os testes feitos foram
+executados em paralelo em um cluster de computadores onde cada máquina tinha 8 CPUs Intel Xeon
+2.3GHz e 16GB de memória. Para os testes feitos neste projeto, foi usado apenas uma máquina com 4
+CPUs Intel i7--4500U 1.8GHz. Enquanto que no artigo original durou-se 6 minutos para completar o
+aprendizado do conjunto de dados Caltech-101 para todas as categorias, os testes feitos neste
+projeto excederam mais de 24 horas para três categorias. Devido a esta discrepância em
+\textit{hardware} e tempo de execução, não foi possível apresentar resultados para todos os testes
+usando a arquitetura de Poon-Domingos. Será assinalado por $\ast$ nas tabelas de teste quando o
+algoritmo excedeu o tempo limite de 24 horas.
 
-%O último conjunto de dados é um \textit{dataset} próprio. Foram criadas 700 imagens de dígitos de 0
-%a 9, com cada dígito tendo 70 amostras. A variância das imagens em cada categoria é baixa pois o
-%\textit{dataset} tem como amostra apenas a caligrafia de uma pessoa.
+Em questão de tempo de execução, o algoritmo de Gens-Domingos foi o mais rápido comparado aos
+outros nos conjuntos de dados mencionados. No entanto, sua complexidade aumenta significantemente
+quando existe um número grande de categorias por variável. Isto ocorre pois o passo de determinar
+as partições de variáveis independentes ocupou 90\% do tempo de execução do algoritmo, e os testes
+estatísticos de independência dependem fortemente do número de categorias das variáveis envolvidas.
+Por meio da quantização das imagens (de 8-bit para 3 ou 4-bit), o tempo de execução foi diminuído
+significantemente. Em comparação, o algoritmo de Dennis-Ventura manteve-se mais constante em
+relação ao conjunto de dados. Como o método usa otimização de gradiente para determinar os pesos, o
+tempo de execução dependeu mais fortemente do número de instâncias. O número de categorias para
+cada variável não teve impacto no desempenho. O método de aprendizado de Poon-Domingos teve o maior
+tempo de execução em todos os testes.
 
-%\begin{figure}[h]
-  %\centering\includegraphics[scale=0.8]{imgs/digits_sample.png}
-  %\caption{Uma amostra do conjunto de dados Digits.}
-%\end{figure}
+As tabelas de acurácia mostram a porcentagem de acertos que cada algoritmo apresentou no conjunto.
+A linha ``Partição $p$'' indica a porcentagem $p$ do conjunto de dados usados para treino e $1-p$
+para teste. Portanto, se $p=0.7$ no conjunto DigitsX, serão usadas 490 imagens para treino e 210
+para teste. Cada partição tem número uniforme de imagens para cada rótulo de classificação. Para o
+conjunto MNIST, como existem conjuntos de treino e teste separados, não houve partição. Ao invés
+disso, foram feitas classificações in-sample, onde faz-se a união do conjunto de treino e teste e
+em seguida toma-se aleatoriamente metade desta união como treino e o restante como teste, e
+classificação out-sample, onde toma-se apenas o conjunto de treino para treino e o de teste para
+teste. Todos os valores de acurácia são em porcentagem de acerto.
 
-%Foram utilizados Caltech-101 e Digits para testes de classificação, e Olivetti para compleição de
-%imagens. Para cada iteração, foi usado uma porcentagem $p$ para validação cruzada, onde $p$ é a
-%porcentagem do \textit{dataset} usado para treino, e $1-p$ para teste.
+\begin{table}[h]
+  \centering\textbf{DigitsX}\vspace{0.25cm}
+  \begin{tabular}{l|cccccccccc}
+    Partição $p$ & $0.1$ & $0.2$ & $0.3$ & $0.4$ & $0.5$ & $0.6$ & $0.7$ & $0.8$ & $0.9$\\
+    \hline
+    Poon-Domingos & & & & & & & & &\\
+    Dennis-Ventura & $92.85$ & $98.57$ & $99.18$ & $98.81$ & $99.42$ & $99.28$ & $98.57$ & $93.33$ & $88.75$\\
+    Gens-Domingos & $91.27$ & $96.78$ & $96.93$ & $98.09$ & $97.14$ & $97.85$ & $97.61$ & $92.66$ & $86.25$\\
+  \end{tabular}
+\end{table}
 
-%\begin{figure}[h]
-  %\centering\includegraphics[scale=0.75]{imgs/caltech_percs.png}
-  %\captionsetup{justification=raggedright}
-  %\caption{O gráfico mostra a porcentagem de acerto no conjunto de dados Caltech-101 normalizado
-  %para uma porcentagem $p$ de instâncias usadas para treino. A barra verde mostra as porcentagens
-  %de acerto máximas e mínimas, enquanto que a linha azul mostra as médias das porcentagens de
-  %acerto.}
-%\end{figure}
+\begin{table}[h]
+  \centering\textbf{MNIST}\vspace{0.25cm}\\
+  \begin{tabular}{l|ccc}
+    Classificação & Poon-Domingos & Dennis-Ventura & Gens-Domingos \\
+    \hline
+    In-sample & $\ast$ & $77.85$ & $81.55$ \\
+    Out-sample & $\ast$ & $69.90$ & \\
+  \end{tabular}
+\end{table}
 
-%\begin{figure}[H]
-  %\centering\includegraphics[scale=0.75]{imgs/caltech_time.png}
-  %\captionsetup{justification=raggedright}
-  %\caption{O gráfico acima mostra o tempo de aprendizado para cada $p$ no \textit{dataset}
-  %Caltech-101. O tempo de inferência foi muito menor, na escala de segundos.}
-%\end{figure}
+\begin{table}[h]
+  \centering\textbf{Caltech-101}\vspace{0.25cm}\\
+  \begin{tabular}{l|cccccccccc}
+    Partição $p$ & $0.1$ & $0.2$ & $0.3$ & $0.4$ & $0.5$ & $0.6$ & $0.7$ & $0.8$ & $0.9$\\
+    \hline
+    Poon-Domingos & & & & & & & & &\\
+    Dennis-Ventura & & & & & & & & &\\
+    Gens-Domingos & $60.37$ & $72.50$ & & & & & & &\\
+  \end{tabular}
+\end{table}
 
-%\begin{figure}[h]
-  %\centering\includegraphics[scale=0.8]{imgs/digits_percs.png}
-  %\caption{O gráfico mostra a porcentagem de acerto no conjunto de dados Digits.}
-%\end{figure}
+No quesito acurácia na tarefa de classificação, o algoritmo de Gens-Domingos teve os melhores
+resultados na média. Em seguida, Dennis-Ventura alcançou resultados comparáveis mas inferiores ao
+primeiro. Por último, o de Poon-Domingos apresentou os piores resultados. O algoritmo de
+Gens-Domingos generalizou melhor a partir dos dados. No entanto, o de Dennis-Ventura apresentou
+melhores resultados quando havia poucos dados de treino.
 
-%\begin{figure}[H]
-  %\centering\includegraphics[scale=0.9]{imgs/digits_time.png}
-  %\caption{O gráfico mostra o tempo de aprendizado para cada $p$ em Digits.}
-%\end{figure}
+Para os testes de compleição de imagem, dois parâmetros foram definidos. O parâmetro de
+conhecimento de classe (CC) indica se o teste de compleição admite que a SPN tenha conhecimento da
+classe a ser completada. Por exemplo, no conjunto Olivetti existem 40 classes, onde cada classe
+corresponde a uma pessoa. Cada classe contém 10 instâncias de rostos. Com conhecimento de classe, o
+teste de compleição para uma instância $I$ de uma classe $c$ no conjunto $D$ será avaliado com uma
+SPN treinada com o conjunto de dados $D\setminus\{I\}$, ou seja, a SPN terá conhecimento do rosto
+da pessoa cuja imagem será completada. Sem conhecimento a priori o teste é feito com uma SPN
+treinada com o conjunto $D\setminus\{I\}, \forall I$ tal que $I[C]=c$, ou seja, com o conjunto de
+todas as imagens cujos rostos não pertençam a pessoa $c$. O segundo parâmetro, chamado de
+conhecimento de rótulo (CR) indica se, durante a compleição de uma imagem $I$, foi dada como parte
+da evidência o rótulo da imagem a ser completada. O parâmetro CC tenta avaliar o quão bem a SPN
+generaliza os dados quando se é dado conhecimento desconhecido ao modelo, enquanto que o parâmetro
+CR avalia se a compleição depende da classificação da classe para gerar uma boa compleição.
 
-%O conjunto Olivetti possue 10 imagens de cada pessoa em diferentes ângulos. As imagens
-%diferenciam-se pela presença de acessórios, como óculos, ou por suas feições faciais, como boca
-%aberta, sorriso ou olhos fechados.
-
-%Para compleição de imagens no conjunto de dados Olivetti, foram aplicados dois testes. Em ambos
-%testes foi selecionada uma imagem a ser completada, que é então removida do conjunto de treino. No
-%primeiro teste, o modelo utilizou tanto as imagens de outras pessoas como as 9 imagens restantes da
-%pessoa a ser completada como conjunto de treino. Chamou-se este método de teste com conhecimento
-%prévio. Chamou-se de teste sem conhecimento prévio quando apenas utilizamos as faces de outras
-%pessoas, descartando as 9 restantes.
-
-%\begin{figure}[h]
-  %\centering\includegraphics[scale=0.9]{imgs/c1_face_cmpl_39.png}
-  %\captionsetup{justification=raggedright}
-  %\caption{O resultado da compleição da parte esquerda da face dada a parte direita do rosto. Neste
-  %teste houve conhecimento prévio. O modelo percebe a presença de óculos e pêlo facial.}
-%\end{figure}
-%\newpage
-
-%\begin{figure}[H]
-  %\centering\includegraphics[scale=0.9]{imgs/c2_face_cmpl_39.png}
-  %\captionsetup{justification=raggedright}
-  %\caption{A mesma face, porém sem conhecimento prévio. O modelo já não percebe a presença de
-  %óculos com a mesma taxa de acerto.}
-%\end{figure}
+É possível replicar os testes usando o código presente em
+\url{https://github.com/RenatoGeh/benchmarks}.
 
 \section{Conclusão}
 
