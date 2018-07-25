@@ -640,7 +640,9 @@ significantemente. Em comparação, o algoritmo de Dennis-Ventura manteve-se mai
 relação ao conjunto de dados. Como o método usa otimização de gradiente para determinar os pesos, o
 tempo de execução dependeu mais fortemente do número de instâncias. O número de categorias para
 cada variável não teve impacto no desempenho. O método de aprendizado de Poon-Domingos teve o maior
-tempo de execução em todos os testes.
+tempo de execução em todos os testes. Como cada iteração do algoritmo demora cerca de 15 minutos e
+todos conjuntos de dados contém mais de 300 instâncias, não foi possível extrair resultados de
+todos os conjuntos para o algoritmo de Poon-Domingos.
 
 As tabelas de acurácia mostram a porcentagem de acertos que cada algoritmo apresentou no conjunto.
 A linha ``Partição $p$'' indica a porcentagem $p$ do conjunto de dados usados para treino e $1-p$
@@ -679,14 +681,25 @@ teste. Todos os valores de acurácia são em porcentagem de acerto.
     Partição $p$ & $0.1$ & $0.2$ & $0.3$ & $0.4$ & $0.5$ & $0.6$ & $0.7$ & $0.8$ & $0.9$\\
     \hline
     Poon-Domingos & & & & & & & & &\\
-    Dennis-Ventura & & & & & & & & &\\
-    Gens-Domingos & $60.37$ & $72.50$ & & & & & & &\\
+    Dennis-Ventura & $78.58$ & $78.49$ & $80.28$ & $79.88$ & $81.38$ & $81.35$ & $75.45$ & $74.78$ & $75.75$\\
+    Gens-Domingos & $77.40$ & $85.00$ & $84.28$ & $86.11$ & $88.66$ & $90.00$ & & &\\
+  \end{tabular}
+\end{table}
+
+\begin{table}[h]
+  \centering\textbf{Olivetti}\vspace{0.25cm}\\
+  \begin{tabular}{l|cccccccccc}
+    Partição $p$ & $0.1$ & $0.2$ & $0.3$ & $0.4$ & $0.5$ & $0.6$ & $0.7$ & $0.8$ & $0.9$\\
+    \hline
+    Poon-Domingos & & & & & & & & &\\
+    Dennis-Ventura & $83.78$ & $74.88$ & $89.85$ & $89.93$ & $96.22$ & $97.50$ & $92.89$ & $50.00$ & $60.93$\\
+    Gens-Domingos & $77.40$ & $85.00$ & $84.28$ & $86.11$ & $88.66$ & $90.00$ & & &\\
   \end{tabular}
 \end{table}
 
 No quesito acurácia na tarefa de classificação, o algoritmo de Gens-Domingos teve os melhores
-resultados na média. Em seguida, Dennis-Ventura alcançou resultados comparáveis mas inferiores ao
-primeiro. Por último, o de Poon-Domingos apresentou os piores resultados. O algoritmo de
+resultados na média. Em seguida, Dennis-Ventura alcançou resultados comparáveis ao primeiro
+algoritmo. Por último, o de Poon-Domingos apresentou os piores resultados. O algoritmo de
 Gens-Domingos generalizou melhor a partir dos dados. No entanto, o de Dennis-Ventura apresentou
 melhores resultados quando havia poucos dados de treino.
 
