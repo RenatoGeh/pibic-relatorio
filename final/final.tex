@@ -601,11 +601,12 @@ testes.
 Foram feitos testes de classificação e compleição em todos os conjuntos de dados. O algoritmo de
 Gens-Domingos admite tarefas de classificação e compleição sem alterar sua arquitetura, já que sua
 estrutura independe do domínio das variáveis. Para os algoritmos de Poon-Domingos e Dennis-Ventura,
-a rede gerada representa uma imagem, e adicionar informação externa requer modificar a estrutura da
-rede. Para a tarefa de classificação nestes dois métodos de aprendizado, foi gerada uma estrutura
-onde cada classe contém uma sub-SPN treinada a partir das instâncias do rótulo correspondente.
-Variáveis indicadoras da variável de classificação ``ligam'' e ``desligam'' as sub-SPNs conforme a
-valoração da classificação.
+as redes geradas pelos algoritmos descritos nos artigos representam uma imagem, e adicionar
+informação externa, como uma variável representando rótulos de classificação, requer modificar a
+estrutura da rede. Para a tarefa de classificação nestes dois métodos de aprendizado, foi gerada
+uma estrutura onde cada classe contém uma sub-SPN treinada a partir das instâncias do rótulo
+correspondente.  Variáveis indicadoras da variável de classificação ``ligam'' e ``desligam'' as
+sub-SPNs conforme a valoração da classificação.
 
 \begin{figure}[h]
   \centering\includegraphics[scale=0.55]{graphs/classarch.png}
@@ -625,83 +626,88 @@ executados em paralelo em um cluster de computadores onde cada máquina tinha 8 
 2.3GHz e 16GB de memória. Para os testes feitos neste projeto, foi usado apenas uma máquina com 4
 CPUs Intel i7--4500U 1.8GHz. Enquanto que no artigo original durou-se 6 minutos para completar o
 aprendizado do conjunto de dados Caltech-101 para todas as categorias, os testes feitos neste
-projeto excederam mais de 24 horas para três categorias. Devido a esta discrepância em
-\textit{hardware} e tempo de execução, não foi possível apresentar resultados para todos os testes
-usando a arquitetura de Poon-Domingos. Será assinalado por $\ast$ nas tabelas de teste quando o
-algoritmo excedeu o tempo limite de 24 horas.
+projeto com o algoritmo de Poon-Domingos excederam mais de 24 horas para três categorias. Além
+disso, enquanto que o artigo original usa 16 somas por região e 8 gaussianas por pixel, por
+limitação de memória, tivemos de usar apenas 4 somas por região e 4 gaussianas por pixel. Devido a
+esta discrepância em \textit{hardware} e tempo de execução, não foi possível apresentar resultados
+para todos os testes usando a arquitetura de Poon-Domingos, e quando foi possível, os resultados
+foram abaixo do esperado. O código do algoritmo de Poon-Domingos foi fortemente baseado no código
+existente escrito em Java disponibilizado pelos autores do artigo. É possível que existam erros no
+código, porém é também possível que os resultados ruins e longos tempos de execução se devam à
+limitação de hardware e ao fato de ser necessário usar parâmetros bem menores. Será assinalado por
+$\ast$ nas tabelas de teste quando algum algoritmo excedeu o tempo limite de 24 horas no teste.
+Para os casos em que o algoritmo gastou mais de 16GB de memória, será usado o símbolo $\ast\ast$ na
+tabela de testes.
 
 Em questão de tempo de execução, o algoritmo de Gens-Domingos foi o mais rápido comparado aos
-outros nos conjuntos de dados mencionados. No entanto, sua complexidade aumenta significantemente
-quando existe um número grande de categorias por variável. Isto ocorre pois o passo de determinar
-as partições de variáveis independentes ocupou 90\% do tempo de execução do algoritmo, e os testes
-estatísticos de independência dependem fortemente do número de categorias das variáveis envolvidas.
-Por meio da quantização das imagens (de 8-bit para 3 ou 4-bit), o tempo de execução foi diminuído
-significantemente. Em comparação, o algoritmo de Dennis-Ventura manteve-se mais constante em
-relação ao conjunto de dados. Como o método usa otimização de gradiente para determinar os pesos, o
-tempo de execução dependeu mais fortemente do número de instâncias. O número de categorias para
-cada variável não teve impacto no desempenho. O método de aprendizado de Poon-Domingos teve o maior
-tempo de execução em todos os testes. Como cada iteração do algoritmo demora cerca de 15 minutos e
-todos conjuntos de dados contém mais de 300 instâncias, não foi possível extrair resultados de
-todos os conjuntos para o algoritmo de Poon-Domingos.
+outros em conjuntos de dados com imagems pequenas. No entanto, sua complexidade aumenta
+significantemente quando existe um número grande de categorias por variável ou quando a imagem é
+grande. Isto ocorre pois o passo de determinar as partições de variáveis independentes ocupou 90\%
+do tempo de execução do algoritmo, e os testes estatísticos de independência dependem fortemente do
+número de categorias por variável e tamanho do escopo dos dados.  Por meio da quantização das
+imagens (de 8-bit para 3 ou 4-bit), o tempo de execução diminuiu significantemente. Em comparação,
+o algoritmo de Dennis-Ventura manteve-se mais constante em relação ao conjunto de dados, com
+resultados melhores em tempo de execução ao de Gens-Domingos nos testes de Caltech-101 e Olivetti.
+Como o método usa otimização de gradiente para determinar os pesos, o tempo de execução dependeu
+mais fortemente do número de instâncias. O número de categorias para cada variável não teve impacto
+no tempo de execução. O método de aprendizado de Poon-Domingos teve o maior tempo de execução em
+todos os testes. Como cada iteração do algoritmo demora cerca de 15 minutos e todos conjuntos de
+dados contém mais de 300 instâncias, não foi possível extrair resultados de todos os conjuntos para
+o algoritmo de Poon-Domingos.
 
 As tabelas de acurácia mostram a porcentagem de acertos que cada algoritmo apresentou no conjunto.
-A linha ``Partição $p$'' indica a porcentagem $p$ do conjunto de dados usados para treino e $1-p$
-para teste. Portanto, se $p=0.7$ no conjunto DigitsX, serão usadas 490 imagens para treino e 210
-para teste. Cada partição tem número uniforme de imagens para cada rótulo de classificação. Para o
-conjunto MNIST, como existem conjuntos de treino e teste separados, não houve partição. Ao invés
-disso, foram feitas classificações in-sample, onde faz-se a união do conjunto de treino e teste e
-em seguida toma-se aleatoriamente metade desta união como treino e o restante como teste, e
-classificação out-sample, onde toma-se apenas o conjunto de treino para treino e o de teste para
-teste. Todos os valores de acurácia são em porcentagem de acerto.
+A linha ``Partição $p$'' indica a porcentagem $p$ do conjunto de dados usado para treino e $1-p$
+para teste. Portanto, se $p=0.7$ no conjunto DigitsX, serão usadas 490 imagens para treino e os 210
+restantes para teste. Cada partição tem número uniforme de imagens para cada rótulo de
+classificação. Para o conjunto MNIST, como existem conjuntos de treino e teste separados, não houve
+partição. Ao invés disso, foram feitas classificações in-sample, onde faz-se a união do conjunto de
+treino e teste e em seguida toma-se aleatoriamente metade desta união como treino e o restante como
+teste, e classificação out-sample, onde toma-se apenas o conjunto de treino para treino e o de
+teste para teste. Todos os valores de acurácia são em porcentagem de acerto.
 
-\begin{table}[h]
+\begin{table}[H]
   \centering\textbf{DigitsX}\vspace{0.25cm}
   \begin{tabular}{l|cccccccccc}
     Partição $p$ & $0.1$ & $0.2$ & $0.3$ & $0.4$ & $0.5$ & $0.6$ & $0.7$ & $0.8$ & $0.9$\\
     \hline
-    Poon-Domingos & & & & & & & & &\\
+    Poon-Domingos & $10.0$ & $10.0$ & $\ast$ & $\ast$ & $\ast$ & $\ast$ & $\ast$ & $\ast$ & $\ast$\\
     Dennis-Ventura & $92.85$ & $98.57$ & $99.18$ & $98.81$ & $99.42$ & $99.28$ & $98.57$ & $93.33$ & $88.75$\\
     Gens-Domingos & $91.27$ & $96.78$ & $96.93$ & $98.09$ & $97.14$ & $97.85$ & $97.61$ & $92.66$ & $86.25$\\
-  \end{tabular}
-\end{table}
-
-\begin{table}[h]
-  \centering\textbf{MNIST}\vspace{0.25cm}\\
+  \end{tabular}\\~\\
+  \textbf{Caltech-101}\vspace{0.25cm}\\
+  \begin{tabular}{l|cccccccccc}
+    Partição $p$ & $0.1$ & $0.2$ & $0.3$ & $0.4$ & $0.5$ & $0.6$ & $0.7$ & $0.8$ & $0.9$\\
+    \hline
+    Poon-Domingos & $\ast\ast$ & $\ast\ast$ & $\ast\ast$ & $\ast\ast$ & $\ast\ast$ & $\ast\ast$ & $\ast\ast$ & $\ast\ast$ & $\ast\ast$\\
+    Dennis-Ventura & $78.58$ & $78.49$ & $80.28$ & $79.88$ & $81.38$ & $81.35$ & $75.45$ & $74.78$ & $75.75$\\
+    Gens-Domingos & $77.40$ & $85.00$ & $84.28$ & $86.11$ & $88.66$ & $90.00$ & $92.22$ & $90.00$ & $84.84$\\
+  \end{tabular}\\~\\
+  \textbf{Olivetti}\vspace{0.25cm}\\
+  \begin{tabular}{l|cccccccccc}
+    Partição $p$ & $0.1$ & $0.2$ & $0.3$ & $0.4$ & $0.5$ & $0.6$ & $0.7$ & $0.8$ & $0.9$\\
+    \hline
+    Poon-Domingos & $10.0$ & $\ast\ast$ & $\ast\ast$ & $\ast\ast$ & $\ast\ast$ & $\ast\ast$ & $\ast\ast$ & $\ast\ast$ & $\ast\ast$\\
+    Dennis-Ventura & $83.78$ & $74.88$ & $89.85$ & $89.93$ & $96.22$ & $97.50$ & $92.89$ & $50.00$ & $60.93$\\
+    Gens-Domingos & $2.50$ & $2.50$ & $93.92$ & $91.25$ & $95.50$ & $98.75$ & $81.93$ & $81.59$ & $100.0$\\
+  \end{tabular}\\~\\
+  \textbf{MNIST}\\(2000 treino / 2000 teste)\vspace{0.25cm}\\
   \begin{tabular}{l|ccc}
     Classificação & Poon-Domingos & Dennis-Ventura & Gens-Domingos \\
     \hline
     In-sample & $\ast$ & $77.85$ & $81.55$ \\
-    Out-sample & $\ast$ & $69.90$ & \\
-  \end{tabular}
-\end{table}
-
-\begin{table}[h]
-  \centering\textbf{Caltech-101}\vspace{0.25cm}\\
-  \begin{tabular}{l|cccccccccc}
-    Partição $p$ & $0.1$ & $0.2$ & $0.3$ & $0.4$ & $0.5$ & $0.6$ & $0.7$ & $0.8$ & $0.9$\\
-    \hline
-    Poon-Domingos & & & & & & & & &\\
-    Dennis-Ventura & $78.58$ & $78.49$ & $80.28$ & $79.88$ & $81.38$ & $81.35$ & $75.45$ & $74.78$ & $75.75$\\
-    Gens-Domingos & $77.40$ & $85.00$ & $84.28$ & $86.11$ & $88.66$ & $90.00$ & & &\\
-  \end{tabular}
-\end{table}
-
-\begin{table}[h]
-  \centering\textbf{Olivetti}\vspace{0.25cm}\\
-  \begin{tabular}{l|cccccccccc}
-    Partição $p$ & $0.1$ & $0.2$ & $0.3$ & $0.4$ & $0.5$ & $0.6$ & $0.7$ & $0.8$ & $0.9$\\
-    \hline
-    Poon-Domingos & & & & & & & & &\\
-    Dennis-Ventura & $83.78$ & $74.88$ & $89.85$ & $89.93$ & $96.22$ & $97.50$ & $92.89$ & $50.00$ & $60.93$\\
-    Gens-Domingos & $77.40$ & $85.00$ & $84.28$ & $86.11$ & $88.66$ & $90.00$ & & &\\
+    Out-sample & $\ast$ & $69.90$ & $76.90$ \\
   \end{tabular}
 \end{table}
 
 No quesito acurácia na tarefa de classificação, o algoritmo de Gens-Domingos teve os melhores
-resultados na média. Em seguida, Dennis-Ventura alcançou resultados comparáveis ao primeiro
-algoritmo. Por último, o de Poon-Domingos apresentou os piores resultados. O algoritmo de
-Gens-Domingos generalizou melhor a partir dos dados. No entanto, o de Dennis-Ventura apresentou
-melhores resultados quando havia poucos dados de treino.
+resultados em média. Em seguida, Dennis-Ventura alcançou, em média, resultados comparáveis ao
+primeiro algoritmo. Por último, o de Poon-Domingos apresentou os piores resultados. Observou-se que
+Gens-Domingos tem melhores resultados quando existe um grande número de dados para treino. O
+algoritmo de Dennis-Ventura conseguiu bons resultados com poucos dados. Conjectura-se que, como
+Dennis-Ventura tem uma estrutura voltada para domínios parecidos com o de imagens, é esperado que
+tenha bons resultados com poucos dados. Enquanto isso, o algoritmo de Gens-Domingos tem aplicações
+mais gerais, além de ser um método de aprendizado estrutural, o que requer mais informação para
+gerar uma estrutura mais informativa e que capture melhor as interações entre variáveis.
 
 Para os testes de compleição de imagem, dois parâmetros foram definidos. O parâmetro de
 conhecimento de classe (CC) indica se o teste de compleição admite que a SPN tenha conhecimento da
@@ -709,18 +715,94 @@ classe a ser completada. Por exemplo, no conjunto Olivetti existem 40 classes, o
 corresponde a uma pessoa. Cada classe contém 10 instâncias de rostos. Com conhecimento de classe, o
 teste de compleição para uma instância $I$ de uma classe $c$ no conjunto $D$ será avaliado com uma
 SPN treinada com o conjunto de dados $D\setminus\{I\}$, ou seja, a SPN terá conhecimento do rosto
-da pessoa cuja imagem será completada. Sem conhecimento a priori o teste é feito com uma SPN
-treinada com o conjunto $D\setminus\{I\}, \forall I$ tal que $I[C]=c$, ou seja, com o conjunto de
-todas as imagens cujos rostos não pertençam a pessoa $c$. O segundo parâmetro, chamado de
+da pessoa cuja imagem será completada. Sem conhecimento a priori de classe o teste é feito com uma
+SPN treinada com o conjunto $D\setminus\{I\}, \forall I$ tal que $I[C]=c$, ou seja, com o conjunto
+de todas as imagens cujos rostos não pertençam a pessoa $c$. O segundo parâmetro, chamado de
 conhecimento de rótulo (CR) indica se, durante a compleição de uma imagem $I$, foi dada como parte
 da evidência o rótulo da imagem a ser completada. O parâmetro CC tenta avaliar o quão bem a SPN
-generaliza os dados quando se é dado conhecimento desconhecido ao modelo, enquanto que o parâmetro
-CR avalia se a compleição depende da classificação da classe para gerar uma boa compleição.
+generaliza os dados quando se é dada informação nunca vista pelo modelo, enquanto que o parâmetro
+CR avalia se o teste depende da classificação da classe para gerar uma boa compleição.
 
-É possível replicar os testes usando o código presente em
-\url{https://github.com/RenatoGeh/benchmarks}.
+As compleições foram geradas tomando como evidência metade da imagem e em seguida computando a
+hipótese mais provável (MPE, de \textit{Most Probable Explanation}) que o modelo assume. A MPE de
+uma evidência é computada de forma aproximada usando a rede máximo-produto do modelo. O resultado
+do MPE é um conjunto de valorações das variáveis de todos os pixels da imagem, onde a metade usada
+como evidência permanece inalterada e a outra metade representa a compleição. Nos testes feitos
+neste projeto, coloriu-se em escala de verde a compleição feita pela SPN, enquanto que a metade
+tomada como evidência foi mantida em escala de cinza. Uma linha vermelha de um pixel de largura foi
+traçada para separar as partições.
+
+\begin{figure}[h]
+  \centering\includegraphics[scale=5.0]{cmpl/dennis/face_0.png}
+  \caption{Compleição de uma imagem do conjunto de dados Olivetti usando o algoritmo de
+    Dennis-Ventura. A compleição da esquerda usa compleição de classe (CC), enquanto que o da
+    direita não.\label{fig:cmpl_0}}
+\end{figure}
+
+Analisando as imagens, foi possível perceber que o parâmetro CR não teve impacto nas compleições,
+já que na maior parte das vezes o algoritmo já classificava o rótulo correto. O parâmetro CC teve
+maior impacto. Como a SPN não tem conhecimento de características que apenas uma classe possue, o
+modelo tentou utilizar características de outras classes, gerando faces desproporcionais, como na
+\autoref{fig:cmpl_0}.
+
+As tarefas de compleição mostraram que a SPN identificou características comuns entre várias
+classes. Por exemplo, no conjunto Olivetti, a SPN conseguiu reconstruir partes do corpo como nariz,
+olhos e bigode de forma razoável. Em alguns casos, a rede teve dificuldade com a presença ou
+ausência de óculos e barba.
+
+\begin{figure}[h]
+  \centering\includegraphics[scale=21.0]{cmpl/gens/face_0.png}
+  \caption{Compleição da mesma face da~\autoref{fig:cmpl_0} usando o algoritmo Gens-Domingos. A
+    imagem da esquerda possue conhecimento de classe e a da esquerda não.}
+\end{figure}
+
+O algoritmo de Gens-Domingos apresentou melhores resultados na tarefa de compleição. Algumas
+imagens completadas pelo algoritmo Dennis-Ventura não apresentaram características fortes (como
+nariz, boca ou olhos) mas tinham o formato certo de rosto e cabelo. Certas compleções parecem ter
+parte das faces faltando, enquanto que outras possuem mais de dois olhos. A~\autoref{fig:cmpl_1}
+contém algumas das piores compleições.
+
+A boa performance do algoritmo Gens-Domingos mostra que talvez a estrutura da rede seja mais
+importante do que adequar os pesos do modelo aos dados. Além disso, o algoritmo de Gens-Domingos
+apresentou resultados bem melhores na compleição comparado ao de Dennis-Ventura, o que mostra que o
+primeiro algoritmo parece ser melhor em tarefas generativas. Enquanto isso, em tarefas
+discriminativas como classificação, os dois algoritmos tiveram resultados semelhantes.
+
+\begin{figure}[H]
+  \centering\includegraphics[scale=2.5]{cmpl/notfine/notfine.png}
+  \caption{Compleições com características faciais faltando ou fora do padrão. Nestes casos a rede
+    não conseguiu identificar olhos, nariz orelhas ou bocas de forma ideal.\label{fig:cmpl_1}}
+\end{figure}
+
+Por questão de tempo e limitação de número de páginas do relatório, foram apenas mostradas
+compleições do conjunto de dados Olivetti. No entanto, é possível replicar os testes de
+classificação e compleição de imagens usando o código presente em
+\url{https://github.com/RenatoGeh/benchmarks}. Outras compleições do conjunto Olivetti também podem
+ser vistas em \url{https://github.com/RenatoGeh/gospn/tree/dev/results/olivetti_3bit}.
 
 \section{Conclusão}
+
+Redes soma-produto são modelos probabilísticos baseados em grafos que representam distribuições de
+probabilidade tratáveis. Neste projeto foram feitas comparações no domínio de classificação e
+compleição de imagem entre três métodos de aprendizado estado-da-arte de redes soma-produto. Além
+disso, planejou-se implementar e disponibilizar uma biblioteca livre e gratuita para inferência e
+aprendizado de redes soma-produto.
+
+Foram implementados três algoritmos de aprendizado. No entanto, apenas dois geraram bons
+resultados. Devido à limitações de tempo e memória, e possivelmente erros no código, o terceiro
+algoritmo não rodou de forma ótima. Em tarefas de classificação, os algoritmos que apresentaram
+resultados mostraram boa acurácia em conjuntos de dados reais e artificiais, como identificação de
+dígitos manuscritos, classificação de faces e de objetos, mesmo quando os conjuntos de dados
+continham poucos dados de treino. Na tarefa de compleição, o modelo conseguiu identificar
+características importantes das imagens, e conseguiu as replicar de forma razoável, mesmo quando as
+imagens continham informações nunca antes vistas.
+
+Todo o código é aberto e foi implementado e disponibilizado de forma livre e gratuita em
+\url{https://github.com/RenatoGeh/gospn} com licensa BSD-3-Clause. A biblioteca inclue
+documentação, funções para computar inferência, manipular conjuntos de dados e analisar acurácia em
+classificação e compleição de imagens, além de três algoritmos de aprendizado de redes soma-produto
+implementados com parâmetros ajustáveis, como diferentes variações para clusterização e testes de
+independência de variável.
 
 \printbibliography[]
 
