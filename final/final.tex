@@ -143,7 +143,7 @@ Orientador: Prof.\ Dr.\ Denis Deratani Mauá}\\
 
   Apesar dos resultados promissores, atualmente existem poucas bibliotecas para inferência e
   aprendizado de SPNs. Além disso, não existe atualmente uma comparação detalhada entre diferentes
-  algoritmos de rede-soma produto.
+  algoritmos de aprendizado de rede-soma produto.
 
   Este projeto teve dois objetivos. O primeiro foi construir uma biblioteca livre e gratuita para
   inferência e aprendizado de redes soma-produto. O segundo foi fazer uma comparação de alguns
@@ -189,16 +189,15 @@ imagens~\cite{gens-domingos,poon-domingos,clustering}, reconhecimento de ativida
 e linguagem natural~\cite{nat-lang}.
 
 Uma SPN pode ser definida como um DAG onde nós são somas ponderadas, produtos, variáveis
-indicadoras ou distribuições de probabilidade univariadas. Uma folha de uma SPN é
-sempre uma variável indicadora ou uma distribuição univariada e vice-versa. O escopo de uma SPN é o
-conjunto de todas variáveis da rede. O escopo de uma folha de uma SPN é a variável descrita pela
-variável indicadora ou distribuição univariada. Semânticamente, o conjunto de filhos de um nó soma
-pode ser interpretado como uma relação de semelhança entre as variáveis dos escopos dos filhos,
-enquanto que o conjunto de filhos de um produto pode ser visto como uma relação de independência
-entre os escopos dos filhos do nó produto. O valor de um nó soma é a soma ponderada de seus filhos
-em função dos pesos de suas arestas de saída. O valor de um nó produto é o produto dos valores dos
-filhos e o valor de uma folha é o valor da variável indicadora ou a probabilidade da distribuição
-univariada.
+indicadoras ou distribuições de probabilidade univariadas. Uma folha de uma SPN pode ser uma
+variável indicadora ou uma distribuição univariada. O escopo de uma SPN é o conjunto de todas
+variáveis da rede. O escopo de uma folha de uma SPN é a variável descrita pela variável indicadora
+ou distribuição univariada. Semânticamente, um filho de um nó soma pode ser interpretado como uma
+relação de semelhança entre as variáveis de seu escopo, enquanto que o conjunto de filhos de um
+produto pode ser visto como uma relação de independência entre os escopos dos filhos do nó produto.
+O valor de um nó soma é a soma ponderada de seus filhos em função dos pesos de suas arestas de
+saída. O valor de um nó produto é o produto dos valores dos filhos, e o valor de uma folha é o valor
+da variável indicadora ou a probabilidade da distribuição univariada.
 
 Apesar dos resultados expressivos, atualmente existem poucas bibliotecas para inferência e
 aprendizado de redes soma-produto. Grande parte dos códigos existentes possuem pouca documentação
@@ -276,7 +275,7 @@ ou multinomiais como folhas da rede.
 Para o método de otimização de descida de gradiente, foram criadas as versões \textit{soft} e
 \textit{hard}. A primeira usa as derivadas parciais da SPN em função dos pesos para atualizar os
 parâmetros da rede. No entanto, para o caso de redes profundas o gradiente tende a se aproximar de
-zero conforme o sinal é propagado pela rede. Para evitar este problema, usa-se o segundo método.
+zero conforme o sinal é propagado pelos nós. Para evitar este problema, usa-se o segundo método.
 Seja $S$ uma SPN, define-se $M$ a rede máximo-produto (MPN) de $S$ como o grafo cópia de $S$ em que
 todos os nós somas são substituidos por nós máximo. O valor de um nó máximo é o maior valor
 ponderado de seus filhos. O valor de uma MPN é o valor da raíz. O caminho percorrido a partir da
@@ -399,24 +398,23 @@ geram subregiões maiores ou iguais a $r\times r$, enquanto que para regiões fi
 partições para todas as possíveis subregiões retangulares. As arestas conectando uma região $R$ ao
 conjunto de produtos $\Pi$ são geradas de tal forma que todo nó soma de $R$ está conectada a todo
 nó produto de $\Pi$. Porém, as arestas ligando cada produto em $\Pi$ a cada nó soma nas subregiões
-$r_1$ e $R_2$ podem ou não existir. Para decidir quais arestas devem existir, escolhe-se uma
-ligação $\pi_k\to\sigma_j^i$, onde $\pi\in\Pi$ e $\sigma_j^i\in R_j$, tal que esta aresta seja a
-mais provável dada uma instância do conjunto de treinamento.
+$R_1$ e $R_2$ podem ou não existir. Para decidir quais arestas devem existir, para cada instância
+$I$ do conjunto de treinamento, escolhe-se uma ligação $\pi_k\to\sigma_j^i$, onde $\pi_k\in\Pi$ e
+$\sigma_j^i\in R_j$, tal que esta aresta seja a mais provável dado $I$.
 
-No código disponibilizado pelos autores do
-artigo\footnote{http://spn.cs.washington.edu/spn/downloadspn.php}, o algoritmo usa \textit{hard}
-Expectation-Maximization (EM) para gerar as arestas mais prováveis e decidir seus pesos, apesar do
-artigo dar resultados para o método de otimização de gradiente descendente. Com o intuito de gerar
-resultados mais semelhantes ao artigo possível, foi implementada a parte de se gerar as arestas
-mais prováveis por \textit{hard} EM, porém a ponderação das arestas foi feita a partir do método de
-gradiente.
+No código disponibilizado\footnote{http://spn.cs.washington.edu/spn/downloadspn.php} pelos autores
+do artigo, usa-se apenas \textit{hard} Expectation-Maximization (EM) para gerar as arestas mais
+prováveis e decidir seus pesos, apesar do artigo dar resultados para o método de otimização de
+gradiente descendente. Com o intuito de gerar resultados mais semelhantes ao artigo possível, foi
+implementada a parte de se gerar as arestas mais prováveis por \textit{hard} EM, porém a ponderação
+das arestas foi feita a partir do método de gradiente.
 
 O algoritmo de Dennis-Ventura segue uma ideia similar ao de Poon-Domingos, buscando achar relações
 de semelhança e independência entre regiões da imagem. No entanto, generaliza-se a ideia de região
 para qualquer conjunto de pixels similares, mesmo que não sejam localmente próximas, e podendo
 tomar formas arbitrárias. Para isso, usa-se métodos de clustering para achar tais regiões.
 
-Seja $D$ o conjunto de dados, onde $D_i$ é a $i$-ésima instância. $D_i$ então descreve um conjunto
+Seja $D$ o conjunto de dados, onde $I$ é uma instância de $D$. $I$ então descreve um conjunto
 ordenado de valorações dos pixels (ou seja, uma imagem) indexado pelos pixels. É possível
 visualizar $D$ como uma matriz $n\times m$, onde $n$ é o número de imagens do conjunto de dados e
 $m$ é o número de pixels na imagem. A transposta de $D^\intercal$ é portanto a matriz $m\times n$,
@@ -448,7 +446,7 @@ $k$-cluster em $D$ (não transposto).
     arquitetura real da rede soma-produto (b). Fonte:~\cite{clustering}}
 \end{figure}
 
-Após gerado o grafo de regiões, é feita uma transformação para uma rede soma-produto válida. Cada
+Após gerado o grafo de regiões, faz-se uma transformação para uma rede soma-produto válida. Cada
 nó região é transformado em um conjunto de $m$ nós somas. Se a região representa apenas um pixel,
 então geram-se $g$ nós gaussianas, onde cada $q$-ésima gaussiana é o $q$-quantil do pixel. Para um
 nó partição P, sejam $R_1$ e $R_2$ as duas subregiões filhas de $P$, e sejam $|R_1|$ e $|R_2|$ o
@@ -457,10 +455,11 @@ aresta de $P$ é uma combinação dois a dois dos nós $R_1^i$ e $R_2^j$. O resu
 transformação é a arquitetura de Dennis-Ventura. Após criada a arquitetura, aprende-se os pesos
 através do método de otimização de gradiente descendente.
 
-O artigo de Gens e Domingos~\cite{gens-domingos} não explicíta o algoritmo em si. Ao invés disso, é
-dado um esquema de algoritmo que garante uma estrutura profunda. Este esquema é chamado de
-\code{LearnSPN}, e segue a ideia de que nós produtos representam independência entre as variáveis
-envolvidas, enquanto que nós somas representam relações de semelhança entre as instâncias do
+Para o algoritmo de Gens e Domingos, o artigo original~\cite{gens-domingos} não explicíta o
+algoritmo em si. Ao invés disso, é dado um esquema de algoritmo que garante uma estrutura profunda.
+Este esquema é chamado de \code{LearnSPN}, e segue a ideia de que nós produtos representam
+independência entre as variáveis envolvidas, enquanto que nós somas representam relações de
+semelhança entre as instâncias do
 conjunto de dado.
 
 \begin{algorithm}[H]
@@ -505,15 +504,15 @@ implementadas duas versões desta parte. A primeira retorna como folha uma distr
 com as frequências dos valores presentes em $I$. A segunda retorna uma distribuição gaussiana com
 média e variância calculadas a partir de $I$.
 
-Em seguida o algoritmo tenta construir um nó produto. Tomando-se $I$ e $X$, tenta-se particionar
+Em seguida, o algoritmo tenta construir um nó produto. Tomando-se $I$ e $X$, tenta-se particionar
 $X$ em $P_1,P_2,\ldots,P_m$ partições, onde toda variável $Y\in P_i$ e $Z\in P_j$ obedece $Y\indep
-X$ se e somente se $i\neq j$, onde $\indep$ representa independência. Foram implementados os testes
+Z$ se e somente se $i\neq j$, onde $\indep$ representa independência. Foram implementados os testes
 de $\chi^2$ e $G$-test para estatisticamente determinar se duas variáveis são independentes. No
 entanto, testar cada variável par-a-par é intratável. Para resolver este problema, foi gerado um
 grafo de independência, onde um vértice representa uma variável e uma aresta indica dependência
 entre duas variáveis. Achar as partições de $X$ equivale a achar todas as componentes conexas do
-grafo. Melhor do que isso, é fácil ver que é suficiente achar a árvore geradora mínima do grafo de
-independência. Para isso, foi implementado o algoritmo de Kruskal para árvores geradoras mínimas.
+grafo. Melhor do que isso, é fácil ver que é suficiente achar as árvores geradoras mínimas de cada
+componente. Para isso, foi implementado o algoritmo de Kruskal para árvores geradoras mínimas.
 As partições $P_1,\ldots,P_m$ equivalem às componentes conexas do grafo. Se $m>1$, então foram
 encontradas relações de independência suficientes para construir um nó produto. Este nó produto tem
 como filhos as chamadas recursivas de \code{LearnSPN} onde os escopos foram reduzidos às variáveis
@@ -551,10 +550,9 @@ os testes do artigo original~\cite{poon-domingos}.
 \end{figure}
 
 As imagens do Olivetti Faces Dataset\footnote{Disponível em
-  \url{http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html}} também foram
-redimensionadas para imagens de tamanho $46\times 56$ com resolução 3-bits em escala de cinza. Este
-conjunto de dados contém 10 fotos de rostos com ângulos e expressões diferentes de 40 pessoas
-diferentes.
+  \url{http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html}} foram redimensionadas
+para imagens de tamanho $46\times 56$ com resolução 3-bits em escala de cinza. Este conjunto de
+dados contém 10 fotos de rostos com ângulos e expressões diferentes de 40 pessoas diferentes.
 
 \begin{figure}[h]
   \centering\includegraphics[scale=0.5]{imgs/olivetti_sample.png}
@@ -617,27 +615,29 @@ sub-SPNs conforme a valoração da classificação.
     $S|Y=y_i$ representa uma SPN treinada com dados onde $Y$ teve valor $y_i$.}
 \end{figure}
 
-Para a tarefa de compleição de imagem nas arquiteturas de Poon-Domingos e Dennis-Ventura, foram
-feitos testes tanto com as suas estruturas originais, onde as rotulações das classes não são
-tomadas em consideração, quanto com as estruturas de classificação.
+Para a tarefa de classificação, foram usadas as arquiteturas descritas acima. Para compleição,
+notou-se que a estrutura de classificação gerou melhores resultados para o algoritmo
+Dennis-Ventura. No entanto, para o algoritmo Poon-Domingos, esta arquitetura ocupou mais memória do
+que o limite de 16GB da máquina usada para os testes. Portanto, para a tarefa de compleição com o
+algoritmo Poon-Domingos, foi usada a estrutura descrita no artigo original.
 
 No artigo original de Hoifung Poon e Pedro Domingos~\cite{poon-domingos}, os testes feitos foram
 executados em paralelo em um cluster de computadores onde cada máquina tinha 8 CPUs Intel Xeon
 2.3GHz e 16GB de memória. Para os testes feitos neste projeto, foi usado apenas uma máquina com 4
-CPUs Intel i7--4500U 1.8GHz. Enquanto que no artigo original durou-se 6 minutos para completar o
-aprendizado do conjunto de dados Caltech-101 para todas as categorias, os testes feitos neste
-projeto com o algoritmo de Poon-Domingos excederam mais de 24 horas para três categorias. Além
-disso, enquanto que o artigo original usa 16 somas por região e 8 gaussianas por pixel, por
-limitação de memória, tivemos de usar apenas 4 somas por região e 4 gaussianas por pixel. Devido a
-esta discrepância em \textit{hardware} e tempo de execução, não foi possível apresentar resultados
-para todos os testes usando a arquitetura de Poon-Domingos, e quando foi possível, os resultados
-foram abaixo do esperado. O código do algoritmo de Poon-Domingos foi fortemente baseado no código
-existente escrito em Java disponibilizado pelos autores do artigo. É possível que existam erros no
-código, porém é também possível que os resultados ruins e longos tempos de execução se devam à
-limitação de hardware e ao fato de ser necessário usar parâmetros bem menores. Será assinalado por
-$\ast$ nas tabelas de teste quando algum algoritmo excedeu o tempo limite de 24 horas no teste.
-Para os casos em que o algoritmo gastou mais de 16GB de memória, será usado o símbolo $\ast\ast$ na
-tabela de testes.
+CPUs Intel i7--4500U 1.8GHz e 16GM de RAM\@. Enquanto que no artigo original durou-se 6 minutos
+para completar o aprendizado do conjunto de dados Caltech-101 para todas as categorias, os testes
+feitos neste projeto com o algoritmo de Poon-Domingos excederam mais de 24 horas para apenas três
+categorias.  Além disso, enquanto que o artigo original usa 16 somas por região e 8 gaussianas por
+pixel, por limitação de memória foi necessário usar apenas 4 somas por região e 4 gaussianas por
+pixel nos testes deste projeto. Devido a esta discrepância em \textit{hardware} e tempo de
+execução, não foi possível apresentar resultados para todos os testes usando a arquitetura de
+Poon-Domingos, e quando foi possível, os resultados foram abaixo do esperado. O código do algoritmo
+de Poon-Domingos foi fortemente baseado no código existente escrito em Java disponibilizado pelos
+autores do artigo. É possível que existam erros no código, porém é também possível que os
+resultados ruins e longos tempos de execução se devam à limitação de hardware e ao fato de ter sido
+necessário usar parâmetros bem menores. Será assinalado por $\ast$ nas tabelas de teste quando
+algum algoritmo excedeu o tempo limite de 24 horas no teste.  Para os casos em que o algoritmo
+gastou mais de 16GB de memória, será usado o símbolo $\ast\ast$ na tabela de testes.
 
 Em questão de tempo de execução, o algoritmo de Gens-Domingos foi o mais rápido comparado aos
 outros em conjuntos de dados com imagems pequenas. No entanto, sua complexidade aumenta
@@ -774,6 +774,16 @@ discriminativas como classificação, os dois algoritmos tiveram resultados seme
     não conseguiu identificar olhos, nariz orelhas ou bocas de forma ideal.\label{fig:cmpl_1}}
 \end{figure}
 
+\begin{figure}[h]
+  \centering\includegraphics[scale=0.6175]{cmpl/gens/full/r1/face_cmpl_37.png}
+  \includegraphics[scale=0.6175]{cmpl/gens/full/r2/face_cmpl_37.png}
+  \captionsetup{justification=raggedright}
+  \caption{Algumas compleições do algoritmo Gens-Domingos em dez imagens de uma única classe
+    do conjunto de dados Olivetti. A imagem da esquerda foi completada usando o parâmetro CC,
+    enquanto que o da direita não. É possível notar que em alguns casos o modelo corretamente
+    adiciona ou remove a presença de óculos na imagem.}
+\end{figure}
+
 Por questão de tempo e limitação de número de páginas do relatório, foram apenas mostradas
 compleições do conjunto de dados Olivetti. No entanto, é possível replicar os testes de
 classificação e compleição de imagens usando o código presente em
@@ -791,9 +801,9 @@ aprendizado de redes soma-produto.
 Foram implementados três algoritmos de aprendizado. No entanto, apenas dois geraram bons
 resultados. Devido à limitações de tempo e memória, e possivelmente erros no código, o terceiro
 algoritmo não rodou de forma ótima. Em tarefas de classificação, os algoritmos que apresentaram
-resultados mostraram boa acurácia em conjuntos de dados reais e artificiais, como identificação de
-dígitos manuscritos, classificação de faces e de objetos, mesmo quando os conjuntos de dados
-continham poucos dados de treino. Na tarefa de compleição, o modelo conseguiu identificar
+resultados mostraram boa acurácia em conjuntos de dados reais e artificiais, como classificação de
+dígitos manuscritos, reconhecimento de faces e identificação de objetos, mesmo quando os conjuntos
+de dado continham poucos dados de treino. Na tarefa de compleição, o modelo conseguiu identificar
 características importantes das imagens, e conseguiu as replicar de forma razoável, mesmo quando as
 imagens continham informações nunca antes vistas.
 
